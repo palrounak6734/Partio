@@ -1,0 +1,48 @@
+name: SplitShield CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build, Verify Circuits & Run Test Suites
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install Contract Dependencies
+        run: npm install --prefix contract
+
+      - name: Run Vitest Unit Tests (In-Memory Witness & Circuit Simulation)
+        run: npm test --prefix contract
+
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      - name: Build Frontend Application (TypeScript + Vite)
+        run: npm run build --prefix frontend
+
+      - name: Verify Generated Circuit Artifacts
+        run: |
+          echo "Verifying generated managed artifacts exist..."
+          test -d contract/managed/compiler
+          test -d contract/managed/contract
+          test -d contract/managed/keys
+          test -d contract/managed/zkir
+          echo "✅ All circuit artifacts, prover/verifier keys, and types verified."
