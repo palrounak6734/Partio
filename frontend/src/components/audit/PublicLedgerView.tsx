@@ -31,7 +31,6 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
     ? 'Finalized'
     : 'Inactive';
 
-  // Construct JSON representation of on-chain ledger state
   const ledgerJson = {
     contractAddress: contractState.contractAddress,
     network: 'Midnight Preprod',
@@ -53,7 +52,7 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
   };
 
   return (
-    <div id="audit-section" className="p-6 sm:p-8 rounded-2xl bg-[#0b1222]/90 border border-slate-800 shadow-2xl">
+    <div id="audit-section" className="p-6 sm:p-8 rounded-2xl bg-titanium-850/90 border border-slate-800 shadow-2xl backdrop-blur-xl">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -73,12 +72,12 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
           </div>
         </div>
 
-        {/* Finalize Pool Action (for Organizer) */}
+        {/* Finalize Pool Action */}
         {contractState.distributionStatus === 1 && (
           <button
             onClick={onFinalize}
             disabled={isProving}
-            className="text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+            className="text-xs px-3.5 py-2 rounded-xl bg-titanium-800 hover:bg-titanium-700 text-slate-200 border border-slate-700 transition-colors"
           >
             Finalize Distribution Pool
           </button>
@@ -87,7 +86,7 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
 
       {/* Contract Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 my-6">
-        <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+        <div className="p-4 rounded-xl bg-titanium-950/80 border border-slate-800">
           <div className="text-[11px] text-slate-400 mb-1">Pool Status</div>
           <div className="text-base font-bold text-white flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${
@@ -97,23 +96,23 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+        <div className="p-4 rounded-xl bg-titanium-950/80 border border-slate-800">
           <div className="text-[11px] text-slate-400 mb-1">Verified Proofs</div>
-          <div className="text-base font-bold font-mono text-cyan-300">
+          <div className="text-base font-bold font-mono text-emerald-300">
             {contractState.verifiedAllocationsCount} / {contractState.participantCount}
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+        <div className="p-4 rounded-xl bg-titanium-950/80 border border-slate-800">
           <div className="text-[11px] text-slate-400 mb-1">Total Pool Ceiling</div>
           <div className="text-base font-bold font-mono text-slate-100">
             {contractState.totalPoolAmount.toLocaleString()} tNIGHT
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+        <div className="p-4 rounded-xl bg-titanium-950/80 border border-slate-800">
           <div className="text-[11px] text-slate-400 mb-1">Preprod Block Height</div>
-          <div className="text-base font-bold font-mono text-emerald-400 flex items-center gap-1.5">
+          <div className="text-base font-bold font-mono text-amber-400 flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5" />
             <span>#{contractState.blockHeight.toLocaleString()}</span>
           </div>
@@ -121,11 +120,11 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
       </div>
 
       {/* Contract Address & Explorer Bar */}
-      <div className="mb-6 p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 p-4 rounded-xl bg-titanium-950/90 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs">
-          <Shield className="w-4 h-4 text-cyan-400" />
+          <Shield className="w-4 h-4 text-emerald-400" />
           <span className="text-slate-400 font-medium">Deployed Contract Address:</span>
-          <span className="font-mono text-cyan-200">{contractState.contractAddress}</span>
+          <span className="font-mono text-emerald-200">{contractState.contractAddress}</span>
           <button
             onClick={handleCopyContract}
             className="p-1 text-slate-400 hover:text-white transition-colors"
@@ -138,7 +137,7 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
           href={`${MIDNIGHT_CONFIG.explorerUrl}/contract/${contractState.contractAddress}`}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 underline underline-offset-2"
+          className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 underline underline-offset-2"
         >
           <span>View on Midnight Explorer</span>
           <ExternalLink className="w-3.5 h-3.5" />
@@ -146,12 +145,12 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
       </div>
 
       {/* Public Ledger JSON Terminal */}
-      <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
-        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/80 border-b border-slate-800 text-xs">
+      <div className="rounded-xl overflow-hidden border border-slate-800 bg-titanium-950">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-titanium-900/90 border-b border-slate-800 text-xs">
           <span className="font-mono text-slate-400">public_ledger_state.json</span>
           <span className="text-[10px] text-emerald-400 font-semibold uppercase">Zero Sensitive PII Disclosed</span>
         </div>
-        <pre className="p-4 text-xs font-mono text-cyan-300/90 overflow-x-auto leading-relaxed">
+        <pre className="p-4 text-xs font-mono text-emerald-300/90 overflow-x-auto leading-relaxed">
           {JSON.stringify(ledgerJson, null, 2)}
         </pre>
       </div>
@@ -166,7 +165,7 @@ export const PublicLedgerView: React.FC<PublicLedgerViewProps> = ({
           {logs.map((log) => (
             <div
               key={log.id}
-              className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs"
+              className="p-3 rounded-xl bg-titanium-950/70 border border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs"
             >
               <div className="flex items-center gap-2.5">
                 <span className="text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]">

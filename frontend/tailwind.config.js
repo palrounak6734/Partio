@@ -7,19 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        obsidian: {
-          950: '#070b14',
-          900: '#0b1222',
-          800: '#101b33',
-          700: '#18274a',
-          600: '#223666',
+        titanium: {
+          950: '#07090d',
+          900: '#0b0e14',
+          850: '#10141d',
+          800: '#161c27',
+          700: '#212938',
+          600: '#2f3b4e',
         },
-        cyber: {
-          cyan: '#38bdf8',
-          indigo: '#818cf8',
-          violet: '#a855f7',
+        aurora: {
           emerald: '#10b981',
-          amber: '#f59e0b',
+          mint: '#34d399',
+          gold: '#f59e0b',
+          amber: '#fbbf24',
+          amethyst: '#8b5cf6',
+          violet: '#a855f7',
           rose: '#f43f5e',
         }
       },
@@ -28,21 +30,23 @@ export default {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       animation: {
-        'scanline': 'scanlineFull 4.5s ease-in-out infinite alternate',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'orb-float': 'orbFloat 12s ease-in-out infinite alternate',
+        'shimmer-slow': 'shimmer 6s ease-in-out infinite',
+        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+        'aurora-glow': 'auroraGlow 10s ease-in-out infinite alternate',
       },
       keyframes: {
-        scanlineFull: {
-          '0%': { top: '2%', opacity: '0.2' },
-          '15%': { opacity: '0.95' },
-          '85%': { opacity: '0.95' },
-          '100%': { top: '96%', opacity: '0.2' },
+        shimmer: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.9' },
         },
-        orbFloat: {
-          '0%': { transform: 'translate(0px, 0px) scale(1)' },
-          '50%': { transform: 'translate(30px, -20px) scale(1.08)' },
-          '100%': { transform: 'translate(-20px, 25px) scale(0.96)' },
+        pulseSubtle: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.9' },
+          '50%': { transform: 'scale(1.02)', opacity: '1' },
+        },
+        auroraGlow: {
+          '0%': { transform: 'translate(0, 0) scale(1)' },
+          '50%': { transform: 'translate(20px, -15px) scale(1.06)' },
+          '100%': { transform: 'translate(-15px, 20px) scale(0.95)' },
         }
       }
     },

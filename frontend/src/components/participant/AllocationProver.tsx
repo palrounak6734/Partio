@@ -9,7 +9,8 @@ interface AllocationProverProps {
   onVerifyProof: (
     allocation: number,
     ruleType: number,
-    ruleParam?: number
+    ruleParam?: number,
+    secretString?: string
   ) => Promise<{ success: boolean; message: string; nullifier: string }>;
   isProving: boolean;
   provingStep: string;
@@ -32,15 +33,12 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
     nullifier: string;
   } | null>(null);
 
-  // Quick fill helper chips for easy testing without pre-populating defaults
   const handleFillValid = () => {
     if (currentRuleType === 1) {
-      // 25% of pool
       const validShare = (totalPoolAmount * 25) / 100;
       setAllocationAmount(String(validShare));
       setPercentageParam('25');
     } else if (currentRuleType === 2) {
-      // Equal split
       const equalShare = totalPoolAmount / participantCount;
       setAllocationAmount(String(equalShare));
     } else {
@@ -51,7 +49,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
   };
 
   const handleFillInvalid = () => {
-    // Purposefully violates constraints to test circuit assertion rejection!
+    // Violates constraints to test circuit rejection!
     setAllocationAmount(String(totalPoolAmount + 5000));
     setPercentageParam('25');
     setSecretPassphrase('zk_invalid_contributor');
@@ -88,24 +86,24 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
       return;
     }
 
-    const res = await onVerifyProof(alloc, currentRuleType, param);
+    const res = await onVerifyProof(alloc, currentRuleType, param, secretPassphrase || 'splitshield_secret_key');
     setProofResult(res);
   };
 
   const activeRule = DISTRIBUTION_RULES.find((r) => r.id === currentRuleType) || DISTRIBUTION_RULES[0];
 
   return (
-    <div id="participant-section" className="p-6 sm:p-8 rounded-2xl bg-[#0b1222]/90 border border-indigo-500/25 shadow-2xl shadow-indigo-500/5">
+    <div id="participant-section" className="p-6 sm:p-8 rounded-2xl bg-titanium-850/90 border border-emerald-500/25 shadow-2xl shadow-emerald-500/5 backdrop-blur-xl">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
             <EyeOff className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider font-bold text-indigo-400">Step 2 — Participant Prover</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
+              <span className="text-xs uppercase tracking-wider font-bold text-emerald-400">Step 2 — Participant Prover</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300">
                 100% Private Witness
               </span>
             </div>
@@ -120,14 +118,14 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
           <button
             type="button"
             onClick={handleFillValid}
-            className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-colors"
+            className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors"
           >
             ✓ Fill Valid Share
           </button>
           <button
             type="button"
             onClick={handleFillInvalid}
-            className="text-xs px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition-colors"
+            className="text-xs px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 transition-colors"
           >
             ✗ Test Circuit Rejection
           </button>
@@ -142,10 +140,10 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
       </div>
 
       {/* Privacy Guarantee Banner */}
-      <div className="mt-4 p-3.5 rounded-xl bg-slate-950/80 border border-indigo-500/20 flex items-start gap-3">
-        <Lock className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+      <div className="mt-4 p-3.5 rounded-xl bg-titanium-950/80 border border-amber-500/25 flex items-start gap-3">
+        <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <div className="text-xs text-slate-300 leading-relaxed">
-          <span className="font-semibold text-indigo-300">Private Witness Guarantee:</span> Your payout amount and secret salt are passed to the Compact circuit inside your browser's RAM. They are <span className="underline decoration-indigo-400">never transmitted over the network</span> and will never be revealed on-chain.
+          <span className="font-semibold text-amber-300">Private Witness Guarantee:</span> Your payout amount and secret salt are passed to the Compact circuit inside your browser's RAM. They are <span className="underline decoration-emerald-400 font-semibold">never transmitted over the network</span> and will never be revealed on-chain.
         </div>
       </div>
 
@@ -156,7 +154,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
               <span>Your Private Payout Amount (Secret Witness)</span>
-              <span className="text-[11px] font-normal text-rose-400">Never Disclosed</span>
+              <span className="text-[11px] font-normal text-amber-400">Never Disclosed</span>
             </label>
             <div className="relative">
               <input
@@ -164,21 +162,21 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
                 value={allocationAmount}
                 onChange={(e) => setAllocationAmount(e.target.value)}
                 placeholder="e.g. 2500"
-                className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/70 focus:border-indigo-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-titanium-950/90 border border-slate-700/70 focus:border-emerald-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-emerald-400">
                 tNIGHT
               </span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1">Your confidential compensation allocation</p>
           </div>
 
-          {/* Rule Parameter Input if Percentage Split */}
+          {/* Rule Parameter Input */}
           {currentRuleType === 1 ? (
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
                 <span>Agreed Percentage Share (%)</span>
-                <span className="text-[11px] font-normal text-cyan-400">Public Rule</span>
+                <span className="text-[11px] font-normal text-emerald-400">Public Rule</span>
               </label>
               <div className="relative">
                 <input
@@ -188,7 +186,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
                   placeholder="e.g. 25"
                   min="1"
                   max="100"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/70 focus:border-indigo-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
+                  className="w-full px-4 py-3 rounded-xl bg-titanium-950/90 border border-slate-700/70 focus:border-emerald-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
                   %
@@ -201,7 +199,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Active Rule Constraint
               </label>
-              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs font-mono text-indigo-300 flex items-center justify-between h-[46px]">
+              <div className="p-3 rounded-xl bg-titanium-950/60 border border-slate-800 text-xs font-mono text-emerald-300 flex items-center justify-between h-[46px]">
                 <span>{activeRule.name}</span>
                 <span className="text-slate-500">{activeRule.badge}</span>
               </div>
@@ -216,7 +214,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
               <button
                 type="button"
                 onClick={handleGenerateSecret}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+                className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
               >
                 <RefreshCw className="w-3 h-3" />
                 <span>Generate Random Salt</span>
@@ -228,7 +226,7 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
                 value={secretPassphrase}
                 onChange={(e) => setSecretPassphrase(e.target.value)}
                 placeholder="e.g. contributor_secret_salt_hash"
-                className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/70 focus:border-indigo-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-titanium-950/90 border border-slate-700/70 focus:border-emerald-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
               />
               <Key className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             </div>
@@ -240,8 +238,8 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
         {proofResult && (
           <div className={`p-4 rounded-xl border flex flex-col gap-2 ${
             proofResult.success
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200'
+              : 'bg-rose-500/15 border-rose-500/40 text-rose-200'
           }`}>
             <div className="flex items-center gap-2 font-bold text-sm">
               {proofResult.success ? (
@@ -270,11 +268,11 @@ export const AllocationProver: React.FC<AllocationProverProps> = ({
         <button
           type="submit"
           disabled={isProving}
-          className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 hover:from-indigo-400 hover:to-purple-500 disabled:opacity-60 text-white font-semibold text-sm shadow-xl shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+          className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
         >
           {isProving ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
               <span>{provingStep || 'Synthesizing ZK-SNARK Proof...'}</span>
             </>
           ) : (

@@ -3,22 +3,22 @@ import React from 'react';
 export const BackgroundGrid: React.FC = () => {
   return (
     <>
-      {/* Background Cyber Grid */}
-      <div className="bg-cyber-grid" />
-      <div className="bg-cyber-dots" />
+      {/* Titanium Ambient Gradient Mesh (Zero Blue Grids) */}
+      <div className="bg-titanium-ambient" />
+      <div className="bg-vault-facets" />
 
-      {/* Ambient Glowing Orbs */}
+      {/* Floating Auroral Glow Orbs */}
       <div 
-        className="fixed top-[-10%] left-[15%] w-[450px] h-[450px] rounded-full pointer-events-none z-0 opacity-20 filter blur-[120px]"
-        style={{ background: 'radial-gradient(circle, #38bdf8 0%, #1e1b4b 70%)' }}
+        className="fixed top-[-5%] left-[20%] w-[500px] h-[500px] rounded-full pointer-events-none z-0 opacity-20 filter blur-[140px] animate-aurora-glow"
+        style={{ background: 'radial-gradient(circle, #10b981 0%, #064e3b 70%)' }}
       />
       <div 
-        className="fixed bottom-[10%] right-[10%] w-[550px] h-[550px] rounded-full pointer-events-none z-0 opacity-15 filter blur-[140px]"
-        style={{ background: 'radial-gradient(circle, #818cf8 0%, #0c0a1e 70%)' }}
+        className="fixed bottom-[15%] right-[12%] w-[450px] h-[450px] rounded-full pointer-events-none z-0 opacity-15 filter blur-[130px] animate-aurora-glow"
+        style={{ background: 'radial-gradient(circle, #f59e0b 0%, #78350f 70%)' }}
       />
       <div 
-        className="fixed top-[45%] right-[25%] w-[350px] h-[350px] rounded-full pointer-events-none z-0 opacity-10 filter blur-[100px]"
-        style={{ background: 'radial-gradient(circle, #2dd4bf 0%, transparent 70%)' }}
+        className="fixed top-[45%] right-[30%] w-[400px] h-[400px] rounded-full pointer-events-none z-0 opacity-10 filter blur-[120px]"
+        style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)' }}
       />
     </>
   );

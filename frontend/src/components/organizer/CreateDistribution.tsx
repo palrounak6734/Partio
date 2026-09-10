@@ -23,7 +23,6 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
-  // Quick fill helper chips for quick testing without pre-populating defaults
   const handleQuickFill = () => {
     setSelectedRule(1);
     setPoolAmount('10000');
@@ -67,17 +66,17 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
   const currentRuleObj = DISTRIBUTION_RULES.find((r) => r.id === selectedRule) || DISTRIBUTION_RULES[0];
 
   return (
-    <div id="organizer-section" className="p-6 sm:p-8 rounded-2xl bg-[#0b1222]/90 border border-cyan-500/25 shadow-2xl shadow-cyan-500/5">
+    <div id="organizer-section" className="p-6 sm:p-8 rounded-2xl bg-titanium-850/90 border border-emerald-500/25 shadow-2xl shadow-emerald-500/5 backdrop-blur-xl">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
             <Sliders className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider font-bold text-cyan-400">Step 1 — Organizer</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+              <span className="text-xs uppercase tracking-wider font-bold text-emerald-400">Step 1 — Organizer</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                 Public Setup
               </span>
             </div>
@@ -92,7 +91,7 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
           <button
             type="button"
             onClick={handleQuickFill}
-            className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition-colors"
+            className="text-xs px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-emerald-300 border border-slate-700 transition-colors"
           >
             ⚡ Fill Example
           </button>
@@ -107,7 +106,7 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-        {/* Rule Selector (Touch-friendly slide-bar layout) */}
+        {/* Rule Selector */}
         <div>
           <label className="block text-xs font-semibold text-slate-300 mb-2">
             Select Allocation Rule Model
@@ -122,14 +121,14 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
                   onClick={() => setSelectedRule(rule.id)}
                   className={`p-4 rounded-xl text-left border transition-all ${
                     isSelected
-                      ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-lg shadow-cyan-500/10'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      ? 'bg-emerald-500/15 border-emerald-400 text-white shadow-lg shadow-emerald-500/10'
+                      : 'bg-titanium-900/70 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="font-semibold text-sm text-slate-100">{rule.name}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
-                      isSelected ? 'bg-cyan-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'
+                      isSelected ? 'bg-emerald-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'
                     }`}>
                       {rule.badge}
                     </span>
@@ -141,9 +140,9 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
           </div>
 
           {/* Active Rule Constraint Formula Callout */}
-          <div className="mt-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs">
+          <div className="mt-3 p-3 rounded-xl bg-titanium-950/90 border border-slate-800/80 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-mono">Circuit Constraint:</span>
-            <span className="font-mono text-cyan-300 font-semibold">{currentRuleObj.mathFormula}</span>
+            <span className="font-mono text-emerald-300 font-semibold">{currentRuleObj.mathFormula}</span>
           </div>
         </div>
 
@@ -159,9 +158,9 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
                 value={poolAmount}
                 onChange={(e) => setPoolAmount(e.target.value)}
                 placeholder="e.g. 10000"
-                className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/70 focus:border-cyan-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-titanium-950/90 border border-slate-700/70 focus:border-emerald-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-emerald-400">
                 tNIGHT
               </span>
             </div>
@@ -178,7 +177,7 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
                 value={participantCount}
                 onChange={(e) => setParticipantCount(e.target.value)}
                 placeholder="e.g. 4"
-                className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/70 focus:border-cyan-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-titanium-950/90 border border-slate-700/70 focus:border-emerald-400 focus:outline-none text-white font-mono text-sm placeholder:text-slate-600 placeholder:italic transition-colors"
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
                 Members
@@ -209,7 +208,7 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
             <button
               type="button"
               onClick={onOpenConnectModal}
-              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-sm shadow-xl shadow-cyan-500/20 transition-all"
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/20 transition-all"
             >
               Connect Wallet to Deploy Distribution
             </button>
@@ -217,12 +216,12 @@ export const CreateDistribution: React.FC<CreateDistributionProps> = ({
             <button
               type="submit"
               disabled={isProving}
-              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-white font-semibold text-sm shadow-xl shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
             >
               {isProving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{provingStep || 'Processing on Midnight...'}</span>
+                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <span>{provingStep || 'Processing on Midnight SDK...'}</span>
                 </>
               ) : (
                 <>

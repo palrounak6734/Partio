@@ -8,36 +8,41 @@
   }
 
   body {
-    background-color: #070b14;
+    background-color: #07090e;
     color: #e2e8f0;
   }
 }
 
-/* ─── Cybernetic Deep Background Grid & Ambient Elements ─────────────────── */
-.bg-cyber-grid {
+/* ─── Luxury Titanium & Prismatic Mesh (ZERO Blue Grid Lines) ───────────── */
+.bg-titanium-ambient {
   position: fixed;
   inset: 0;
-  background-size: 56px 56px;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.09), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 85% 60%, rgba(245, 158, 11, 0.05), transparent 60%),
+    radial-gradient(ellipse 50% 50% at 15% 75%, rgba(139, 92, 246, 0.05), transparent 60%),
+    #07090e;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle architectural vault facet lines */
+.bg-vault-facets {
+  position: fixed;
+  inset: 0;
   background-image: 
-    linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
   pointer-events: none;
   z-index: 0;
+  opacity: 0.6;
 }
 
-.bg-cyber-dots {
-  position: fixed;
-  inset: 0;
-  background-size: 56px 56px;
-  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.22) 1.5px, transparent 1.5px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ─── Fluid Proportional Container (Eliminates desktop empty black void) ─── */
+/* ─── Fluid Container ────────────────────────────────────────────────────── */
 .app-container {
   max-width: 1440px;
-  width: 95%;
+  width: 94%;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;
@@ -51,38 +56,38 @@
   }
 }
 
-/* ─── Laser Scanline Animation (Full-Image Coordinate Traversal) ─────────── */
-.scanline-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #38bdf8 25%, #818cf8 50%, #38bdf8 75%, transparent 100%);
-  box-shadow: 0 0 16px #38bdf8, 0 0 28px rgba(56, 189, 248, 0.7);
-  opacity: 0.9;
-  pointer-events: none;
-  z-index: 10;
-  animation: scanFullImage 4.5s ease-in-out infinite alternate;
+/* ─── Titanium Frosted Glass Cards ───────────────────────────────────────── */
+.titanium-card {
+  background: rgba(16, 20, 29, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.04) inset;
 }
 
-@keyframes scanFullImage {
-  0% {
-    top: 2%;
-    opacity: 0.25;
-  }
-  15% {
-    opacity: 0.95;
-  }
-  85% {
-    opacity: 0.95;
-  }
-  100% {
-    top: 96%;
-    opacity: 0.25;
-  }
+.titanium-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ─── Touch and Hardware Optimizations ───────────────────────────────────── */
+.titanium-card-hover:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 40px -12px rgba(16, 185, 129, 0.15), 0 0 1px 1px rgba(16, 185, 129, 0.1) inset;
+  transform: translateY(-2px);
+}
+
+/* ─── Specular Gold & Emerald Accent Borders ────────────────────────────── */
+.specular-emerald {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.12);
+}
+
+.specular-gold {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.12);
+}
+
+/* ─── Touch Optimizations ────────────────────────────────────────────────── */
 @media (pointer: coarse) {
   button, input, select, a {
     min-height: 44px;
@@ -90,40 +95,21 @@
   }
 }
 
-/* ─── Glassmorphism Cards ────────────────────────────────────────────────── */
-.glass-card {
-  background: rgba(16, 27, 51, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.16);
-  border-radius: 1rem;
-}
-
-.glass-card-hover {
-  transition: all 0.25s ease-in-out;
-}
-
-.glass-card-hover:hover {
-  border-color: rgba(56, 189, 248, 0.38);
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
-  transform: translateY(-2px);
-}
-
-/* ─── Custom Cyber Scrollbars ────────────────────────────────────────────── */
+/* ─── Custom Dark Scrollbars ─────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #070b14;
+  background: #07090e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #18274a;
+  background: #1e2638;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;
+  background: #10b981;
 }
