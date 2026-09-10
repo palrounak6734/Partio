@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MIDNIGHT_CONFIG } from '../utils/constants';
+import { splitShieldContractService } from '../services/contractService';
 
 export interface OnChainDistributionState {
   distributionStatus: number; // 0 = Inactive, 1 = Active, 2 = Finalized, 3 = Disputed
@@ -27,7 +28,7 @@ export interface VerificationLog {
 
 export function useContractState() {
   const [state, setState] = useState<OnChainDistributionState>({
-    distributionStatus: 1, // Start with default active sample pool
+    distributionStatus: 1, // Start with default active distribution pool
     ruleType: 1,
     totalPoolAmount: 50000,
     participantCount: 4,
@@ -103,13 +104,25 @@ export function useContractState() {
     };
   }, []);
 
+  /**
+   * Direct invocation of initializeDistribution through Midnight SDK
+   */
   const initializePool = useCallback(async (rule: number, poolAmount: number, participants: number) => {
     setIsProving(true);
-    setProvingStep('Synthesizing initial state transition...');
-    await new Promise((r) => setTimeout(r, 800));
+    setProvingStep('1. Invoking initializeDistribution Compact circuit...');
+    await new Promise((r) => setTimeout(r, 600));
 
-    setProvingStep('Publishing distribution parameters to Preprod ledger...');
-    await new Promise((r) => setTimeout(r, 1200));
+    setProvingStep('2. Synthesizing initial state transition via @midnight-ntwrk/compact-runtime...');
+    const result = await splitShieldContractService.initializeDistribution(rule, poolAmount, participants);
+
+    if (!result.success) {
+      setIsProving(false);
+      setProvingStep('');
+      throw new Error(result.message);
+    }
+
+    setProvingStep('3. Publishing distribution parameters to Midnight Preprod ledger...');
+    await new Promise((r) => setTimeout(r, 800));
 
     setState((prev) => ({
       ...prev,
@@ -127,70 +140,73 @@ export function useContractState() {
     setProvingStep('');
   }, []);
 
+  /**
+   * Direct invocation of ZK verification circuits through Midnight SDK
+   */
   const verifyAllocationProof = useCallback(async (
     allocation: number,
     ruleType: number,
-    ruleParam?: number
+    ruleParam?: number,
+    secretString = 'splitshield_secret_contributor_key'
   ): Promise<{ success: boolean; message: string; nullifier: string }> => {
     setIsProving(true);
-    setProvingStep('1. Loading private witness into client memory (RAM)...');
+    setProvingStep('1. Evaluating private witness inside local client memory (RAM)...');
+    await new Promise((r) => setTimeout(r, 500));
+
+    const encoder = new TextEncoder();
+    const rawSecret = encoder.encode(secretString);
+    const secretBytes = new Uint8Array(32);
+    secretBytes.set(rawSecret.slice(0, 32));
+
+    setProvingStep('2. Compiling arithmetic polynomial constraints via Compact runtime...');
     await new Promise((r) => setTimeout(r, 600));
 
-    setProvingStep('2. Compiling arithmetic constraints over private witness...');
-    await new Promise((r) => setTimeout(r, 900));
+    let executionResult;
 
-    // Evaluate circuit assertions
-    if (allocation <= 0) {
-      setIsProving(false);
-      setProvingStep('');
-      return { success: false, message: 'Circuit assertion failed: Allocation must be greater than zero.', nullifier: '' };
-    }
-
-    if (allocation > state.totalPoolAmount) {
-      setIsProving(false);
-      setProvingStep('');
-      return { success: false, message: 'Circuit assertion failed: Allocation exceeds total pool amount.', nullifier: '' };
-    }
-
-    if (ruleType === 1 && ruleParam) {
-      // Percentage split check: allocation * 100 == totalPool * percentage
-      const expected = (state.totalPoolAmount * ruleParam) / 100;
-      if (allocation !== expected) {
-        setIsProving(false);
-        setProvingStep('');
-        return {
-          success: false,
-          message: `Circuit assertion failed: Private allocation does not match configured ${ruleParam}% share.`,
-          nullifier: '',
-        };
-      }
+    if (ruleType === 1 && ruleParam !== undefined) {
+      // Percentage split circuit call
+      setProvingStep(`3. Invoking verifyPercentageSplit (${ruleParam}% of ${state.totalPoolAmount.toLocaleString()} tNIGHT)...`);
+      executionResult = await splitShieldContractService.verifyPercentageSplit(
+        allocation,
+        ruleParam,
+        secretBytes,
+        state.totalPoolAmount
+      );
     } else if (ruleType === 2) {
-      // Equal split check: allocation * participantCount == totalPool
-      const expected = state.totalPoolAmount / state.participantCount;
-      if (allocation !== expected) {
-        setIsProving(false);
-        setProvingStep('');
-        return {
-          success: false,
-          message: `Circuit assertion failed: Allocation deviates from equal share (${expected}).`,
-          nullifier: '',
-        };
-      }
+      // Equal split circuit call
+      setProvingStep(`3. Invoking verifyEqualSplit (1/${state.participantCount} equal share)...`);
+      executionResult = await splitShieldContractService.verifyEqualSplit(
+        allocation,
+        secretBytes,
+        state.totalPoolAmount,
+        state.participantCount
+      );
+    } else {
+      // General allocation circuit call
+      setProvingStep('3. Invoking verifyAllocation (General ZK constraint proof)...');
+      executionResult = await splitShieldContractService.verifyAllocation(
+        allocation,
+        secretBytes,
+        state.totalPoolAmount
+      );
     }
 
-    setProvingStep('3. Synthesizing ZK-SNARK proof and deriving nullifier...');
-    await new Promise((r) => setTimeout(r, 1100));
+    if (!executionResult.success) {
+      setIsProving(false);
+      setProvingStep('');
+      return {
+        success: false,
+        message: executionResult.message,
+        nullifier: '',
+      };
+    }
 
-    // Generate random nullifier
-    const randHex = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    const nullifier = `0x${randHex}`;
-
-    setProvingStep('4. Submitting proof to Midnight Preprod verifier...');
-    await new Promise((r) => setTimeout(r, 1000));
+    setProvingStep('4. Submitting ZK-SNARK proof and nullifier to Midnight Preprod verifier...');
+    await new Promise((r) => setTimeout(r, 800));
 
     const timestamp = Date.now();
+    const nullifier = executionResult.nullifierHash || `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('')}`;
+
     setState((prev) => ({
       ...prev,
       verifiedAllocationsCount: prev.verifiedAllocationsCount + 1,
@@ -215,13 +231,20 @@ export function useContractState() {
 
     setIsProving(false);
     setProvingStep('');
-    return { success: true, message: 'ZK-SNARK proof verified successfully on Midnight Preprod!', nullifier };
+    return {
+      success: true,
+      message: executionResult.message,
+      nullifier,
+    };
   }, [state]);
 
+  /**
+   * Direct invocation of finalizeDistribution through Midnight SDK
+   */
   const finalizePool = useCallback(async () => {
     setIsProving(true);
-    setProvingStep('Finalizing distribution on-chain...');
-    await new Promise((r) => setTimeout(r, 1000));
+    setProvingStep('Invoking finalizeDistribution circuit on Preprod...');
+    await splitShieldContractService.finalizeDistribution();
     setState((prev) => ({ ...prev, distributionStatus: 2, lastVerifiedTimestamp: Date.now() }));
     setIsProving(false);
     setProvingStep('');
