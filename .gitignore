@@ -14,6 +14,7 @@ build/
 # Midnight wallet state (contains seed phrases and keys!)
 .midnight-state.json
 .midnight-wallet-state/
+*level-db*/
 
 # Internal judging and level tracking (never commit to public repo)
 CHALLENGE_PROGRESS.md

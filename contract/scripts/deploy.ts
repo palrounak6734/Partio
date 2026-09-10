@@ -122,13 +122,26 @@ async function createProviders(walletCtx: WalletContext, api: ApiPromise) {
         { ttl: ttl ?? new Date(Date.now() + 30 * 60 * 1000) },
       );
       console.log('  Recipe created:', recipe.type);
+      console.log('  Signing recipe with unshielded keystore...');
+      const signedRecipe = await walletCtx.wallet.signRecipe(
+        recipe,
+        (data: Uint8Array) => walletCtx.unshieldedKeystore.signData(data),
+      );
       console.log('  Finalizing recipe...');
-      const finalized = await walletCtx.wallet.finalizeRecipe(recipe);
+      const finalized = await walletCtx.wallet.finalizeRecipe(signedRecipe);
       console.log('  Recipe finalized successfully!');
       return finalized;
     },
     submitTx: async (tx: any) => {
-      return broadcastTransaction(api, tx);
+      console.log('  Submitting transaction to Midnight...');
+      try {
+        const txId = await walletCtx.wallet.submitTransaction(tx);
+        console.log(`  ✓ Submitted via WalletFacade! TX ID: ${txId}`);
+        return txId;
+      } catch (err: any) {
+        console.log(`  WalletFacade.submitTransaction returned: ${err?.message || err}. Falling back to Substrate relay broadcast...`);
+        return await broadcastTransaction(api, tx);
+      }
     },
   };
 
@@ -162,31 +175,51 @@ async function main() {
   console.log('  ✓ Connected to Midnight Substrate node.\n');
 
   console.log('─── 2. Wallet Initialization ───────────────────────────────────\n');
-  const walletCtx = await createWallet({ network, networkConfig, seed: SEED, restore: false });
+  const walletCtx = await createWallet({ network, networkConfig, seed: SEED, restore: true });
   const address = walletCtx.unshieldedKeystore.getBech32Address().toString();
   console.log(`  Wallet Address: ${address}`);
 
-  console.log('  Syncing state with Midnight network...');
+  console.log('  Syncing state with Midnight network to ledger tip...');
   const syncStart = Date.now();
   const syncInterval = setInterval(() => {
     const elapsed = Math.round((Date.now() - syncStart) / 1000);
     process.stdout.write(`\r  ⏳ Syncing... (${elapsed}s elapsed)   `);
-  }, 4000);
+  }, 3000);
 
   const state = await new Promise<any>((resolve, reject) => {
-    const sub = walletCtx.wallet.state().subscribe((s) => {
-      if (s.isSynced) {
-        sub.unsubscribe();
-        resolve(s);
+    let lastLog = 0;
+    const sub = walletCtx.wallet.state().subscribe({
+      next: (s) => {
+        const tNight = s.unshielded?.balances?.[unshieldedToken().raw] ?? 0n;
+        const dustBal = s.dust?.balance ? s.dust.balance(new Date()) : 0n;
+        const now = Date.now();
+        if (now - lastLog > 3000 || s.isSynced) {
+          lastLog = now;
+          const uSynced = s.unshielded?.progress?.isStrictlyComplete?.() ?? false;
+          const sSynced = s.shielded?.state?.progress?.isStrictlyComplete?.() ?? false;
+          const dSynced = s.dust?.state?.progress?.isStrictlyComplete?.() ?? false;
+          console.log(`\n  [Sync Status] Unshielded: ${uSynced} | Shielded: ${sSynced} | Dust: ${dSynced} | Overall Synced: ${s.isSynced}`);
+          console.log(`  🪙 Current tNIGHT: ${tNight.toLocaleString()} | ⛽ DUST: ${dustBal.toLocaleString()}`);
+        }
+        if (s.isSynced) {
+          clearInterval(syncInterval);
+          sub.unsubscribe();
+          resolve(s);
+        }
+      },
+      error: (err) => {
+        clearInterval(syncInterval);
+        reject(err);
       }
     });
     walletCtx.wallet.waitForSyncedState().then((s) => {
+      clearInterval(syncInterval);
       sub.unsubscribe();
       resolve(s);
     }).catch(reject);
   });
   clearInterval(syncInterval);
-  process.stdout.write('\r  ✓ Synced with network.                                      \n');
+  process.stdout.write('\r  ✓ Synced with network ledger tip.                           \n');
 
   await persistWalletState(network, walletCtx);
 

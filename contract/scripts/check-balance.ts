@@ -32,25 +32,45 @@ async function main() {
 
   console.log('  Syncing state with Midnight network...');
   const syncStart = Date.now();
-  const syncInterval = setInterval(() => {
-    const elapsed = Math.round((Date.now() - syncStart) / 1000);
-    process.stdout.write(`\r  ⏳ Syncing... (${elapsed}s elapsed)   `);
-  }, 3000);
-
+  const persistInterval = setInterval(() => {
+    persistWalletState(network, walletCtx).catch(() => {});
+  }, 10000);
   const state = await new Promise<any>((resolve, reject) => {
-    const sub = walletCtx.wallet.state().subscribe((s) => {
-      if (s.isSynced) {
-        sub.unsubscribe();
-        resolve(s);
+    let lastLog = 0;
+    const sub = walletCtx.wallet.state().subscribe({
+      next: (s) => {
+        const tNight = s.unshielded?.balances?.[unshieldedToken().raw] ?? 0n;
+        const dustBal = s.dust?.balance ? s.dust.balance(new Date()) : 0n;
+        const now = Date.now();
+        if (now - lastLog > 3000 || s.isSynced || (tNight > 0n && dustBal > 0n)) {
+          lastLog = now;
+          const uSynced = s.unshielded?.progress?.isStrictlyComplete?.() ?? false;
+          const sSynced = s.shielded?.state?.progress?.isStrictlyComplete?.() ?? false;
+          const dSynced = s.dust?.state?.progress?.isStrictlyComplete?.() ?? false;
+          console.log(`\n  [Sync Status] Unshielded: ${uSynced} | Shielded: ${sSynced} | Dust: ${dSynced} | Overall Synced: ${s.isSynced}`);
+          console.log(`  🪙 Current tNIGHT: ${tNight.toLocaleString()} | ⛽ DUST: ${dustBal.toLocaleString()}`);
+          const safeStringify = (obj: any) =>
+            JSON.stringify(obj, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
+          console.log(`  🔍 Dust state details:`, {
+            hasDustState: !!s.dust?.state,
+            dustKeys: s.dust ? Object.keys(s.dust) : [],
+            dustProgress: s.dust?.state?.progress ? safeStringify(s.dust.state.progress) : undefined,
+            shieldedProgress: s.shielded?.state?.progress ? safeStringify(s.shielded.state.progress) : undefined,
+          });
+        }
+        if (s.isSynced || (tNight > 0n && dustBal > 0n)) {
+          clearInterval(persistInterval);
+          sub.unsubscribe();
+          resolve(s);
+        }
+      },
+      error: (err) => {
+        clearInterval(persistInterval);
+        reject(err);
       }
     });
-    walletCtx.wallet.waitForSyncedState().then((s) => {
-      sub.unsubscribe();
-      resolve(s);
-    }).catch(reject);
   });
-  clearInterval(syncInterval);
-  process.stdout.write('\r  ✓ Synced with network.                                      \n\n');
+  console.log('\n  ✓ State check complete.\n');
 
   await persistWalletState(network, walletCtx);
 

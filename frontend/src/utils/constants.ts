@@ -3,7 +3,7 @@ export const MIDNIGHT_CONFIG = {
   rpcUrl: import.meta.env.VITE_MIDNIGHT_RPC_URL || 'https://rpc.preprod.midnight.network',
   indexerUrl: import.meta.env.VITE_INDEXER_URL || 'https://indexer.preprod.midnight.network/api/v4/graphql',
   indexerWsUrl: import.meta.env.VITE_INDEXER_WS_URL || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws',
-  contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS || '888ba1fa2ff52ec6673d58fc8d147ca17caecba63307d90f8c36cf3e0215bbb1',
+  contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS || 'ac973a5c3626dc9535f5aac0fd38607132968c0b4e1d751ffdd356d06b1d00a3',
   explorerUrl: import.meta.env.VITE_EXPLORER_URL || 'https://midnightexplorer.com',
   faucetUrl: 'https://midnight-tmnight-preprod.nethermind.dev',
 };
