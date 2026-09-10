@@ -1,0 +1,39 @@
+{
+  "name": "@splitshield/contract",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SplitShield Compact Zero-Knowledge Circuits & Contract",
+  "scripts": {
+    "compile": "wsl -d Ubuntu -e bash -c \"~/.local/bin/compact compile '/mnt/c/Users/bisha/Videos/midnight projects/SplitShield/contract/src/splitshield.compact' '/mnt/c/Users/bisha/Videos/midnight projects/SplitShield/contract/managed'\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check-balance": "npx tsx scripts/check-balance.ts",
+    "deploy": "npx tsx scripts/deploy.ts",
+    "network": "npx tsx scripts/network.ts"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "^0.16.0",
+    "@midnight-ntwrk/midnight-js-contracts": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-network-id": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-protocol": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-utils": "^4.1.1",
+    "@midnight-ntwrk/wallet-sdk": "^1.2.0",
+    "@polkadot/api": "^15.0.0",
+    "@polkadot/util": "^13.0.0",
+    "@scure/bip39": "^2.4.0",
+    "rxjs": "^7.8.2",
+    "splitshield": "file:..",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

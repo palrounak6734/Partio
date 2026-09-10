@@ -1,0 +1,128 @@
+pragma language_version >= 0.23.0;
+
+import CompactStandardLibrary;
+
+// ─── PUBLIC LEDGER STATE (On-Chain Settlement) ──────────────────────────────
+// Visible to all observers, nodes, and auditors on Midnight
+export ledger distributionStatus: Uint<64>;          // 0 = Inactive, 1 = Active, 2 = Finalized, 3 = Disputed
+export ledger ruleType: Uint<64>;                    // 1 = Percentage Split, 2 = Equal Split, 3 = Capped Allocation
+export ledger totalPoolAmount: Uint<64>;             // Total project allocation pool amount
+export ledger participantCount: Uint<64>;            // Number of authorized participants
+export ledger verifiedAllocationsCount: Uint<64>;    // Total count of verified participant proofs
+export ledger lastVerifiedTimestamp: Uint<64>;       // Most recent verification timestamp
+export ledger lastVerifiedAllocationHash: Bytes<32>; // Nullifier/hash of last verified allocation
+export ledger verificationResult: Boolean;           // Boolean outcome of last verification
+
+// ─── PRIVATE OFF-CHAIN WITNESS FUNCTIONS ─────────────────────────────────────
+// Evaluated exclusively inside the client's local memory / browser wallet
+// Raw witness values NEVER cross the network or appear on-chain
+witness getParticipantAllocation(): Uint<64>;
+witness getParticipantSecret(): Bytes<32>;
+
+// ─── CIRCUIT 1: Initialize Distribution (Organizer) ─────────────────────────
+// Establishes a new distribution pool with public parameters and rule constraints
+export circuit initializeDistribution(
+    rule: Uint<64>,
+    totalPool: Uint<64>,
+    numParticipants: Uint<64>,
+    currentTimestamp: Uint<64>
+): Boolean {
+    assert(distributionStatus == 0 || distributionStatus == 2, "Distribution pool is currently active");
+    assert(totalPool > 0, "Total pool amount must be greater than zero");
+    assert(numParticipants > 0, "Participant count must be greater than zero");
+    assert(rule >= 1 && rule <= 3, "Rule type must be 1 (Percentage), 2 (Equal), or 3 (Capped)");
+
+    ruleType = disclose(rule);
+    totalPoolAmount = disclose(totalPool);
+    participantCount = disclose(numParticipants);
+    verifiedAllocationsCount = 0;
+    distributionStatus = 1;
+    verificationResult = false;
+    lastVerifiedTimestamp = disclose(currentTimestamp);
+    return true;
+}
+
+// ─── CIRCUIT 2: Verify Allocation (General Constraint Proof) ─────────────────
+// Proves in zero-knowledge that the private allocation is within the pool bounds
+// without disclosing the exact payout amount to any party
+export circuit verifyAllocation(
+    currentTimestamp: Uint<64>
+): Boolean {
+    assert(distributionStatus == 1, "Distribution pool must be active");
+
+    const myAllocation = getParticipantAllocation();
+    assert(myAllocation > 0, "Allocation amount must be greater than zero");
+    assert(myAllocation <= totalPoolAmount, "Allocation amount exceeds total pool");
+
+    const mySecret = getParticipantSecret();
+    const nullifier = persistentHash<Bytes<32>>(mySecret);
+
+    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
+    lastVerifiedAllocationHash = disclose(nullifier);
+    lastVerifiedTimestamp = disclose(currentTimestamp);
+    verificationResult = true;
+
+    return disclose(verificationResult);
+}
+
+// ─── CIRCUIT 3: Verify Percentage Split Rule ────────────────────────────────
+// Proves that the private allocation matches exactly the percentage share:
+// myAllocation * 100 == totalPoolAmount * percentage
+// Zero-knowledge constraint without division
+export circuit verifyPercentageSplit(
+    percentage: Uint<64>,
+    currentTimestamp: Uint<64>
+): Boolean {
+    assert(distributionStatus == 1, "Distribution pool must be active");
+    assert(ruleType == 1, "Distribution rule is not configured for Percentage Split");
+    assert(percentage > 0, "Percentage share must be greater than zero");
+    assert(percentage <= 100, "Percentage share cannot exceed 100");
+
+    const myAllocation = getParticipantAllocation();
+    assert(myAllocation * 100 == totalPoolAmount * percentage, "Private allocation does not match percentage share");
+
+    const mySecret = getParticipantSecret();
+    const nullifier = persistentHash<Bytes<32>>(mySecret);
+
+    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
+    lastVerifiedAllocationHash = disclose(nullifier);
+    lastVerifiedTimestamp = disclose(currentTimestamp);
+    verificationResult = true;
+
+    return disclose(verificationResult);
+}
+
+// ─── CIRCUIT 4: Verify Equal Split Rule ─────────────────────────────────────
+// Proves that the private allocation matches an equal share:
+// myAllocation * participantCount == totalPoolAmount
+// Zero-knowledge constraint without division
+export circuit verifyEqualSplit(
+    currentTimestamp: Uint<64>
+): Boolean {
+    assert(distributionStatus == 1, "Distribution pool must be active");
+    assert(ruleType == 2, "Distribution rule is not configured for Equal Split");
+
+    const myAllocation = getParticipantAllocation();
+    assert(myAllocation * participantCount == totalPoolAmount, "Private allocation does not match equal participant share");
+
+    const mySecret = getParticipantSecret();
+    const nullifier = persistentHash<Bytes<32>>(mySecret);
+
+    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
+    lastVerifiedAllocationHash = disclose(nullifier);
+    lastVerifiedTimestamp = disclose(currentTimestamp);
+    verificationResult = true;
+
+    return disclose(verificationResult);
+}
+
+// ─── CIRCUIT 5: Finalize Distribution (Organizer) ───────────────────────────
+// Closes the distribution once all participant proofs have been confirmed
+export circuit finalizeDistribution(
+    currentTimestamp: Uint<64>
+): Boolean {
+    assert(distributionStatus == 1, "Distribution pool must be active to finalize");
+    distributionStatus = 2; // Finalized
+    lastVerifiedTimestamp = disclose(currentTimestamp);
+    return true;
+}
