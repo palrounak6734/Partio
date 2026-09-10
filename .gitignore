@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnp.*
+
+# Build outputs
+dist/
+build/
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Midnight wallet state (contains seed phrases and keys!)
+.midnight-state.json
+.midnight-wallet-state/
+
+# Internal judging and level tracking (never commit to public repo)
+CHALLENGE_PROGRESS.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

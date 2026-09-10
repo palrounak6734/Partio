@@ -1,0 +1,31 @@
+{
+  "name": "splitshield",
+  "version": "0.1.0",
+  "description": "SplitShield — Privacy-Preserving Payment Splits on Midnight",
+  "private": true,
+  "workspaces": [
+    "contract",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "compile:contract": "npm run compile --prefix contract",
+    "test:contract": "npm run test --prefix contract",
+    "check-balance": "npm run check-balance --prefix contract",
+    "deploy:contract": "npm run deploy --prefix contract",
+    "network": "npm run network --prefix contract",
+    "dev:frontend": "npm run dev --prefix frontend"
+  },
+  "keywords": [
+    "midnight",
+    "compact",
+    "zero-knowledge",
+    "privacy",
+    "zk-proofs",
+    "payment-splits",
+    "private-payroll"
+  ],
+  "author": "bishalnium <bishalpvtxd@gmail.com>",
+  "license": "Apache-2.0"
+}
