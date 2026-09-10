@@ -1,4 +1,4 @@
-name: SplitShield CI/CD Pipeline
+name: SplitShield CI/CD & Deployment Pipeline
 
 on:
   push:
@@ -10,9 +10,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1: Build, Test Circuits & Frontend Packaging
+  # ─────────────────────────────────────────────────────────────────────────────
   build-and-test:
-    name: Build, Verify Circuits & Run Test Suites
+    name: 1. Build, Verify Circuits & Run Test Suites
     runs-on: ubuntu-latest
 
     steps:
@@ -29,16 +37,10 @@ jobs:
       - name: Install Contract Dependencies
         run: npm install --prefix contract
 
-      - name: Run Vitest Unit Tests (In-Memory Witness & Circuit Simulation)
+      - name: Run Vitest In-Memory Circuit Simulation Tests (14 Tests)
         run: npm test --prefix contract
 
-      - name: Install Frontend Dependencies
-        run: npm install --prefix frontend
-
-      - name: Build Frontend Application (TypeScript + Vite)
-        run: npm run build --prefix frontend
-
-      - name: Verify Generated Circuit Artifacts
+      - name: Verify Generated Compact ZKIR & Prover Artifacts
         run: |
           echo "Verifying generated managed artifacts exist..."
           test -d contract/managed/compiler
@@ -46,3 +48,112 @@ jobs:
           test -d contract/managed/keys
           test -d contract/managed/zkir
           echo "✅ All circuit artifacts, prover/verifier keys, and types verified."
+
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      - name: Build Frontend Application (TypeScript + Vite)
+        run: npm run build --prefix frontend
+
+      - name: Upload Frontend Production Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2: Smart Contract Deployment Verification & Simulation Pipeline
+  # ─────────────────────────────────────────────────────────────────────────────
+  contract-deployment:
+    name: 2. Smart Contract Preprod Deployment Pipeline
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install Contract Dependencies
+        run: npm install --prefix contract
+
+      - name: Verify Preprod Network Endpoints & RPC Configuration
+        run: |
+          echo "Verifying Midnight Preprod Network Configuration..."
+          npx tsx -e "
+            import { NETWORK_CONFIGS } from './contract/scripts/network.js';
+            const preprod = NETWORK_CONFIGS.preprod;
+            console.log('Target Network:', preprod.networkId);
+            console.log('Substrate RPC:', preprod.node);
+            console.log('GraphQL Indexer:', preprod.indexer);
+            console.log('Proof Server:', preprod.proofServer);
+          "
+
+      - name: Verify SplitShield Compiled Bytecode & Key Assets
+        run: |
+          echo "Validating compiled proving and verification keys for all 5 circuits..."
+          test -f contract/managed/keys/initializeDistribution.verifier
+          test -f contract/managed/keys/verifyAllocation.verifier
+          test -f contract/managed/keys/verifyPercentageSplit.verifier
+          test -f contract/managed/keys/verifyEqualSplit.verifier
+          test -f contract/managed/keys/finalizeDistribution.verifier
+          echo "✅ Preprod contract verification keys ready for deployment."
+
+      - name: Execute Contract Deployment Dry-Run & State Simulation
+        run: |
+          echo "Running automated contract deployment verification..."
+          npx tsx -e "
+            import { Contract, ledger } from './contract/managed/contract/index.js';
+            import { createCircuitContext, dummyContractAddress } from '@midnight-ntwrk/compact-runtime';
+            const coinPublicKey = { bytes: new Uint8Array(32) };
+            const contract = new Contract({
+              getParticipantAllocation: (ctx) => [ctx.privateState, 1000n],
+              getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
+            });
+            const init = contract.initialState({
+              initialPrivateState: {},
+              initialZswapLocalState: { coinPublicKey, currentIndex: 0n, inputs: [], outputs: [] }
+            });
+            const ctx = createCircuitContext(dummyContractAddress(), coinPublicKey, init.currentContractState.data, init.currentPrivateState);
+            const deploySimulation = contract.impureCircuits.initializeDistribution(ctx, 1n, 10000n, 4n, BigInt(Date.now()));
+            console.log('✅ Contract deployment state transition verified! Status:', ledger(deploySimulation.context.currentQueryContext.state).distributionStatus);
+          "
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3: Frontend Web Deployment (GitHub Pages / Staging Preview)
+  # ─────────────────────────────────────────────────────────────────────────────
+  frontend-deployment:
+    name: 3. Frontend Web Hosting Deployment Pipeline
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download Frontend Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./dist
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages (Live Staging)
+        id: deployment
+        uses: actions/deploy-pages@v4

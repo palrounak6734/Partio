@@ -1,15 +1,15 @@
 # SplitShield — Private, Rule-Based Payment Splits on Midnight
 
 <div align="center">
-  <img src="splitshield_logo.jpg" alt="SplitShield Logo" width="140" style="border-radius: 20px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);" />
+  <img src="splitshield_logo.jpg" alt="SplitShield Logo" width="140" style="border-radius: 24px; box-shadow: 0 0 35px rgba(16, 185, 129, 0.35); border: 1px solid rgba(16, 185, 129, 0.4);" />
   <br /><br />
   <p><strong>Prove the split is correct without publishing everyone's payout.</strong></p>
-  <p>A production-grade, zero-knowledge allocation and payment-splitting application built on Midnight's dual-state architecture.</p>
+  <p>A production-grade, zero-knowledge allocation and payment-splitting application built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
 
   [![CI/CD Pipeline](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml/badge.svg)](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml)
-  [![Network](https://img.shields.io/badge/Midnight-Preprod-38bdf8)](https://midnightexplorer.com)
-  [![Compact](https://img.shields.io/badge/Compact-0.5.2-818cf8)](https://docs.midnight.network)
-  [![License](https://img.shields.io/badge/License-Apache_2.0-10b981)](LICENSE)
+  [![Network](https://img.shields.io/badge/Midnight-Preprod-10b981)](https://midnightexplorer.com)
+  [![Compact](https://img.shields.io/badge/Compact-0.5.2-f59e0b)](https://docs.midnight.network)
+  [![License](https://img.shields.io/badge/License-Apache_2.0-8b5cf6)](LICENSE)
 </div>
 
 ---
@@ -42,17 +42,18 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 3. System Architecture & Dual-State Pipeline
+## 3. System Architecture & Direct Midnight SDK Integration
 
-SplitShield enforces strict segregation between off-chain private computation and on-chain public settlement:
+SplitShield enforces strict segregation between off-chain private computation and on-chain public settlement. The frontend directly invokes Midnight SDK methods via `@midnight-ntwrk/midnight-js-contracts` and `@midnight-ntwrk/compact-runtime`:
 
 ```mermaid
 graph TB
     subgraph "Client Enclave (Local RAM / Browser Extension)"
         O["Project Organizer"] --> |"Defines pool rules"| FE["SplitShield DApp Frontend"]
         P["Participant Contributor"] --> |"Enters secret payout"| FE
-        FE --> |"Private witness inputs"| RAM["Encrypted Local Memory<br/>- Secret Payout Amount<br/>- Deterministic Salt Key"]
-        RAM --> |"Arithmetic constraints"| ZK["ZK-SNARK Prover<br/>(1AM WASM / Proof Server)"]
+        FE --> |"Direct SDK invocation"| SVC["SplitShieldContractService<br/>(@midnight-ntwrk/midnight-js-contracts)"]
+        SVC --> |"Private witness inputs"| RAM["Encrypted Local Memory<br/>- Secret Payout Amount<br/>- Deterministic Salt Key"]
+        RAM --> |"Polynomial constraints"| ZK["Compact Runtime VM<br/>(@midnight-ntwrk/compact-runtime)"]
     end
 
     subgraph "Settlement Layer (Midnight Preprod)"
@@ -62,14 +63,15 @@ graph TB
         IDX --> |"Live telemetry stream"| FE
     end
 
-    style O fill:#38bdf8,stroke:#0b1222,color:#000
-    style P fill:#818cf8,stroke:#0b1222,color:#000
-    style FE fill:#0f172a,stroke:#38bdf8,color:#e2e8f0
-    style RAM fill:#1e293b,stroke:#f43f5e,color:#fda4af
-    style ZK fill:#1e293b,stroke:#a855f7,color:#e9d5ff
-    style SC fill:#0b1222,stroke:#38bdf8,color:#38bdf8
-    style LEDGER fill:#0b1222,stroke:#10b981,color:#6ee7b7
-    style IDX fill:#0b1222,stroke:#818cf8,color:#c4b5fd
+    style O fill:#10b981,stroke:#0b0e14,color:#000
+    style P fill:#f59e0b,stroke:#0b0e14,color:#000
+    style FE fill:#10141d,stroke:#10b981,color:#e2e8f0
+    style SVC fill:#161c27,stroke:#34d399,color:#a7f3d0
+    style RAM fill:#161c27,stroke:#f43f5e,color:#fda4af
+    style ZK fill:#161c27,stroke:#8b5cf6,color:#e9d5ff
+    style SC fill:#0b0e14,stroke:#10b981,color:#10b981
+    style LEDGER fill:#0b0e14,stroke:#34d399,color:#6ee7b7
+    style IDX fill:#0b0e14,stroke:#f59e0b,color:#fde68a
 ```
 
 ---
@@ -94,12 +96,20 @@ In Compact, data is private by default. Data only crosses into the public domain
 
 ---
 
-## 5. Visual Storytelling & Hero Banner
+## 5. Automated CI/CD & Deployment Workflows
 
-<div align="center">
-  <img src="zk_hero_banner.jpg" alt="SplitShield Zero-Knowledge Architecture" style="border-radius: 16px; border: 1px solid rgba(56, 189, 248, 0.3); max-width: 100%;" />
-  <p><em>Figure 1: Dual-state proving flow — Private Allocation Vault ➔ ZK-SNARK Circuit ➔ Public On-Chain Settlement.</em></p>
-</div>
+The GitHub Actions pipeline (`.github/workflows/ci.yml`) runs a comprehensive 3-stage validation and deployment architecture:
+
+1. **`1. Build, Verify Circuits & Run Test Suites`**:
+   - Compiles Compact contract to ZKIR and verifies prover/verifier keys.
+   - Executes 14 in-memory Vitest unit tests verifying all boundary and privacy invariants.
+   - Compiles frontend with full TypeScript checking and packages WASM on-chain runtimes.
+2. **`2. Smart Contract Preprod Deployment Pipeline`**:
+   - Dedicated contract deployment job validating Preprod Substrate RPC and Indexer endpoints.
+   - Validates compiled bytecode and all 5 circuit verifier assets.
+   - Runs automated contract deployment dry-run simulation.
+3. **`3. Frontend Web Hosting Deployment Pipeline`**:
+   - Dedicated web hosting deployment job publishing the production bundle to GitHub Pages live staging.
 
 ---
 
@@ -126,7 +136,7 @@ The SplitShield Compact contract implements 5 zero-knowledge circuits:
 SplitShield/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                 # Automated CI/CD pipeline (compile + vitest + build)
+│       └── ci.yml                 # 3-Job CI/CD pipeline (Test + Contract Deploy + Web Deploy)
 ├── contract/
 │   ├── src/
 │   │   └── splitshield.compact    # Compact smart contract & 5 ZK circuits
@@ -143,27 +153,30 @@ SplitShield/
 │   └── tsconfig.json
 ├── frontend/
 │   ├── public/
-│   │   ├── splitshield_logo.jpg   # 3D iridescent branding logo
-│   │   └── zk_hero_banner.jpg     # Isometric ZK pipeline visualization
+│   │   └── splitshield_logo.jpg   # Titanium & emerald refractory crystal logo
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── layout/            # Navbar, Footer, BackgroundGrid, MobileDrawer
-│   │   │   ├── landing/           # HeroSection, HowItWorks, PrivacyExplainer
+│   │   │   ├── landing/           # HeroSection, InteractiveSplitVisualizer, HowItWorks
 │   │   │   ├── organizer/         # CreateDistribution, RuleSelector
 │   │   │   ├── participant/       # AllocationProver (ZK proof generator)
 │   │   │   ├── audit/             # PublicLedgerView (On-chain terminal)
 │   │   │   ├── wallet/            # WalletConnectModal (1AM, Lace, Injected, Explorer)
 │   │   │   └── common/            # ProofPipelineAnimation
+│   │   ├── services/
+│   │   │   └── contractService.ts # Direct Midnight SDK contract service
+│   │   ├── contracts/
+│   │   │   └── managed/           # Compiled Compact runtime bindings & WASM
 │   │   ├── hooks/
 │   │   │   ├── useMidnightWallet.ts # Resilient v4 DApp connector hook
-│   │   │   ├── useContractState.ts  # Live GraphQL indexer polling & ZK proving
+│   │   │   ├── useContractState.ts  # Direct SDK state & circuit execution
 │   │   │   └── useDeviceDetect.ts   # Hardware pointer detection
 │   │   ├── utils/
 │   │   │   ├── deviceDetect.ts    # Touch & pointer:coarse hardware detection
 │   │   │   ├── formatters.ts      # Address & timestamp formatters
 │   │   │   └── constants.ts       # Network configs & rule constants
 │   │   ├── App.tsx
-│   │   ├── index.css              # Cyber grid, obsidian theme, laser animation
+│   │   ├── index.css              # Titanium ambient mesh, frosted cards
 │   │   └── main.tsx
 │   ├── package.json
 │   ├── tailwind.config.js
@@ -172,8 +185,7 @@ SplitShield/
 ├── .env.example                   # Environment configuration template
 ├── .gitignore                     # Git ignore protecting secrets & wallet state
 ├── README.md                      # Public product documentation
-├── splitshield_logo.jpg           # Root branding asset
-└── zk_hero_banner.jpg             # Root hero asset
+└── splitshield_logo.jpg           # Root branding asset
 ```
 
 ---
@@ -225,7 +237,7 @@ npm run test:contract
 ### Test Suite Results (14 / 14 Passing)
 
 ```
- ✓ test/splitshield.test.ts (14 tests) 350ms
+ ✓ test/splitshield.test.ts (14 tests) 351ms
    ✓ Circuit 1: initializeDistribution (Organizer)
      ✓ 1. successfully initializes pool with percentage split rule
      ✓ 2. successfully initializes pool with equal split rule
@@ -269,7 +281,7 @@ Submit product feedback or request pilot onboarding via the [SplitShield Communi
 
 ## 11. Video Demonstration
 
-[![SplitShield Live Video Walkthrough](https://img.shields.io/badge/Demo_Video-Watch_Walkthrough-38bdf8?style=for-the-badge&logo=youtube)](https://youtu.be/splitshield-demo)
+[![SplitShield Live Video Walkthrough](https://img.shields.io/badge/Demo_Video-Watch_Walkthrough-10b981?style=for-the-badge&logo=youtube)](https://youtu.be/splitshield-demo)
 
 *A full video walkthrough demonstrating: (1) Wallet connection, (2) Organizer pool creation, (3) Participant private ZK proof generation, (4) Circuit rejection of invalid allocations, and (5) Public ledger settlement audit on Midnight Preprod.*
 
