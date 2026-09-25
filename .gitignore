@@ -18,6 +18,8 @@ build/
 
 # Internal judging and level tracking (never commit to public repo)
 CHALLENGE_PROGRESS.md
+*RECOVERY*.md
+*PRIVATE*.md
 
 # IDE
 .vscode/

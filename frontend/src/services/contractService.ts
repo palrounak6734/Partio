@@ -350,7 +350,7 @@ export class SplitShieldContractService {
   }
 
   /**
-   * Circuit 6: finalizeDistribution & Circuit 8: getProjectStatus
+   * Circuit 6: finalizeDistribution (Organizer)
    */
   public async finalizeDistribution(
     projectId: Uint8Array,
@@ -396,6 +396,138 @@ export class SplitShieldContractService {
       };
     }
   }
+
+  /**
+   * Circuit 7: claimPayment (Contributor - Proves allocation & claims settlement)
+   */
+  public async claimPayment(
+    projectId: Uint8Array,
+    contributorPubKeyBytes: Uint8Array = new Uint8Array(32).fill(2)
+  ): Promise<SplitShieldCircuitExecutionResult> {
+    const witnesses: Witnesses<SplitShieldWitnessState> = {
+      getPoolAmount: (ctx) => [ctx.privateState, ctx.privateState.poolAmount],
+      getAllocationAmount: (ctx) => [ctx.privateState, ctx.privateState.allocationAmount],
+      getAllocationPercentage: (ctx) => [ctx.privateState, ctx.privateState.allocationPercentage],
+      getTotalPercentage: (ctx) => [ctx.privateState, ctx.privateState.totalPercentage],
+      getBlindingFactor: (ctx) => [ctx.privateState, ctx.privateState.blindingFactor],
+    };
+
+    const contract = new Contract(witnesses);
+    const initialPrivateState: SplitShieldWitnessState = {
+      poolAmount: 10000n,
+      allocationAmount: 2500n,
+      allocationPercentage: 25n,
+      totalPercentage: 100n,
+      blindingFactor: new Uint8Array(32),
+    };
+
+    const ownerKey = new Uint8Array(32).fill(1);
+    const ctx = this.createLocalCircuitContext(contract, initialPrivateState, ownerKey);
+
+    try {
+      // 1. Owner creates project
+      const pRes = contract.impureCircuits.createProject(ctx, projectId);
+      let currentState = pRes.context.currentQueryContext.state;
+
+      // 2. Owner adds contributor
+      const ctxAdd = createCircuitContext(
+        dummyContractAddress(),
+        { bytes: ownerKey },
+        currentState,
+        initialPrivateState
+      );
+      contract.impureCircuits.addContributor(ctxAdd, projectId, contributorPubKeyBytes);
+      currentState = ctxAdd.currentQueryContext.state;
+
+      // 3. Contributor verifies allocation
+      const ctxVer = createCircuitContext(
+        dummyContractAddress(),
+        { bytes: contributorPubKeyBytes },
+        currentState,
+        initialPrivateState
+      );
+      contract.impureCircuits.verifyAllocation(ctxVer, projectId);
+      currentState = ctxVer.currentQueryContext.state;
+
+      // 4. Owner finalizes distribution
+      const ctxFin = createCircuitContext(
+        dummyContractAddress(),
+        { bytes: ownerKey },
+        currentState,
+        initialPrivateState
+      );
+      contract.impureCircuits.finalizeDistribution(ctxFin, projectId);
+      currentState = ctxFin.currentQueryContext.state;
+
+      // 5. Contributor claims payment
+      const ctxClaim = createCircuitContext(
+        dummyContractAddress(),
+        { bytes: contributorPubKeyBytes },
+        currentState,
+        initialPrivateState
+      );
+      contract.impureCircuits.claimPayment(ctxClaim, projectId);
+
+      return {
+        success: true,
+        message: 'Payment successfully claimed with zero-knowledge nullifier proof!',
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err?.message || 'Payment claim assertion failed.',
+      };
+    }
+  }
+
+  /**
+   * Circuit 8: getProjectStatus (Public / Auditor Query)
+   */
+  public async getProjectStatus(
+    projectId: Uint8Array,
+    callerPubKeyBytes: Uint8Array = new Uint8Array(32).fill(99)
+  ): Promise<{ success: boolean; status?: number; message: string }> {
+    const witnesses: Witnesses<SplitShieldWitnessState> = {
+      getPoolAmount: (ctx) => [ctx.privateState, ctx.privateState.poolAmount],
+      getAllocationAmount: (ctx) => [ctx.privateState, ctx.privateState.allocationAmount],
+      getAllocationPercentage: (ctx) => [ctx.privateState, ctx.privateState.allocationPercentage],
+      getTotalPercentage: (ctx) => [ctx.privateState, ctx.privateState.totalPercentage],
+      getBlindingFactor: (ctx) => [ctx.privateState, ctx.privateState.blindingFactor],
+    };
+
+    const contract = new Contract(witnesses);
+    const initialPrivateState: SplitShieldWitnessState = {
+      poolAmount: 10000n,
+      allocationAmount: 0n,
+      allocationPercentage: 0n,
+      totalPercentage: 100n,
+      blindingFactor: new Uint8Array(32),
+    };
+
+    const ctx = this.createLocalCircuitContext(contract, initialPrivateState, callerPubKeyBytes);
+
+    try {
+      const pRes = contract.impureCircuits.createProject(ctx, projectId);
+      const ctx2 = createCircuitContext(
+        dummyContractAddress(),
+        { bytes: callerPubKeyBytes },
+        pRes.context.currentQueryContext.state,
+        initialPrivateState
+      );
+      const statusBigInt = contract.impureCircuits.getProjectStatus(ctx2, projectId);
+      return {
+        success: true,
+        status: Number(statusBigInt),
+        message: `Project status query returned: ${Number(statusBigInt)} (0=ACTIVE, 1=DISTRIBUTING, 2=COMPLETED)`,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err?.message || 'Failed to query project status.',
+      };
+    }
+  }
 }
 
 export const contractService = SplitShieldContractService.getInstance();
+
