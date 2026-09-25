@@ -1,64 +1,73 @@
 import { useState } from 'react';
-import { Navbar } from './components/layout/Navbar';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Navbar, type NavTabId } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { BackgroundGrid } from './components/layout/BackgroundGrid';
 import { MobileDrawer } from './components/layout/MobileDrawer';
 import { WalletConnectModal } from './components/wallet/WalletConnectModal';
+
 import { HeroSection } from './components/landing/HeroSection';
 import { HowItWorks } from './components/landing/HowItWorks';
 import { PrivacyExplainer } from './components/landing/PrivacyExplainer';
-import { CreateDistribution } from './components/organizer/CreateDistribution';
-import { AllocationProver } from './components/participant/AllocationProver';
-import { PublicLedgerView } from './components/audit/PublicLedgerView';
-import { ProofPipelineAnimation } from './components/common/ProofPipelineAnimation';
+
+import { TreasuryKPI } from './components/dashboard/TreasuryKPI';
+import { DistributionMap } from './components/dashboard/DistributionMap';
+import { ProjectsView } from './components/dashboard/ProjectsView';
+import { SplitsView } from './components/dashboard/SplitsView';
+import { ContributorsView } from './components/dashboard/ContributorsView';
+import { ProofsView } from './components/dashboard/ProofsView';
+import { TreasuryView } from './components/dashboard/TreasuryView';
+import { PublicVerifyView } from './components/dashboard/PublicVerifyView';
+import { ZKProofPipeline } from './components/proofs/ZKProofPipeline';
 
 import { useMidnightWallet } from './hooks/useMidnightWallet';
 import { useContractState } from './hooks/useContractState';
 
 export function App() {
+  const [currentTab, setCurrentTab] = useState<NavTabId>('overview');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  // Wallet State
+  // Multi-Wallet & Network Switcher State
   const {
     isConnected,
     isConnecting,
     address,
+    network,
+    balance,
     connect,
     disconnect,
+    switchNetwork,
     error: walletError,
   } = useMidnightWallet();
 
-  // On-Chain Contract & Proving Pipeline State
+  // Multi-Project Contract & ZK Circuit State
   const {
-    state: contractState,
+    projects,
+    activeProject,
+    setActiveProjectId,
     logs,
     isProving,
     provingStep,
-    initializePool,
+    createNewProject,
+    allocateFunds,
     verifyAllocationProof,
-    finalizePool,
-  } = useContractState();
-
-  const handleScrollToOrganizer = () => {
-    const el = document.getElementById('organizer-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleScrollToParticipant = () => {
-    const el = document.getElementById('participant-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
+  } = useContractState(network);
 
   return (
-    <div className="relative min-h-screen flex flex-col text-slate-100 selection:bg-cyan-500/20 selection:text-cyan-300">
-      {/* Background Ambience */}
+    <div className="relative min-h-screen flex flex-col text-slate-100 selection:bg-emerald-500/25 selection:text-emerald-300">
+      {/* Background Ambience: Lighter Titanium & Ambient Luminous Silks (Zero Grid Lines) */}
       <BackgroundGrid />
 
       {/* Navigation */}
       <Navbar
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        currentNetwork={network}
+        onSwitchNetwork={switchNetwork}
         isConnected={isConnected}
         address={address}
+        balance={balance}
         onOpenConnectModal={() => setIsConnectModalOpen(true)}
         onDisconnect={disconnect}
         onToggleMobileDrawer={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
@@ -71,9 +80,12 @@ export function App() {
         onOpenConnectModal={() => setIsConnectModalOpen(true)}
         isConnected={isConnected}
         address={address}
+        currentTab={currentTab}
+        onSelectTab={setCurrentTab}
+        network={network}
       />
 
-      {/* Wallet Connect Modal */}
+      {/* Multi-Wallet Connect Modal */}
       <WalletConnectModal
         isOpen={isConnectModalOpen}
         onClose={() => setIsConnectModalOpen(false)}
@@ -86,55 +98,125 @@ export function App() {
         error={walletError}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 relative z-10">
-        {/* Hero Section with Scanning Laser Banner */}
-        <HeroSection
-          onScrollToOrganizer={handleScrollToOrganizer}
-          onScrollToParticipant={handleScrollToParticipant}
-        />
+      {/* Main Content Area with Smooth Tab Transitions */}
+      <main className="flex-1 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+          >
+            {currentTab === 'overview' && (
+              <div className="space-y-10">
+                {/* Hero Section */}
+                <HeroSection
+                  onScrollToOrganizer={() => setCurrentTab('projects')}
+                  onScrollToParticipant={() => setCurrentTab('splits')}
+                />
 
-        {/* How It Works & Privacy Explainer */}
-        <HowItWorks />
-        <PrivacyExplainer />
+                {/* Treasury KPIs with Animated Counters */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+                      Partition Treasury & Settlement State
+                    </h3>
+                  </div>
+                  <TreasuryKPI projects={projects} verifiedProofsCount={logs.length} />
+                </div>
 
-        {/* Interactive Application Container: Top-to-Bottom Unidirectional Flow */}
-        <section className="py-12">
-          <div className="app-container space-y-8">
-            {/* Step 1: Organizer Pool Creation */}
-            <CreateDistribution
-              onInitialize={initializePool}
+                {/* Active Project Distribution Map */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+                      Live Confidential Partition Stream
+                    </h3>
+                  </div>
+                  <DistributionMap
+                    project={activeProject}
+                    onVerifyClick={() => setCurrentTab('splits')}
+                  />
+                </div>
+
+                {/* 4-Stage ZK Proof Pipeline */}
+                <ZKProofPipeline
+                  isProving={isProving}
+                  currentStepMessage={provingStep}
+                />
+
+                {/* How It Works & Privacy Explainer */}
+                <div className="pt-6">
+                  <HowItWorks />
+                  <PrivacyExplainer />
+                </div>
+              </div>
+            )}
+
+        {currentTab === 'projects' && (
+          <ProjectsView
+            projects={projects}
+            onSelectProject={(id) => {
+              setActiveProjectId(id);
+              setCurrentTab('overview');
+            }}
+            onCreateNewProject={async (title, pool, parts, rule) => {
+              return await createNewProject(title, pool, parts, rule);
+            }}
+            isProving={isProving}
+            isConnected={isConnected}
+            onOpenConnectModal={() => setIsConnectModalOpen(true)}
+          />
+        )}
+
+        {currentTab === 'splits' && (
+          <div className="space-y-6">
+            <SplitsView
+              project={activeProject}
+              onAllocateFunds={async (projId, pct) => {
+                await allocateFunds(projId, pct);
+              }}
               isProving={isProving}
-              provingStep={provingStep}
-              isConnected={isConnected}
-              onOpenConnectModal={() => setIsConnectModalOpen(true)}
             />
-
-            {/* Middle: Active ZK Proving Pipeline Animation */}
-            <ProofPipelineAnimation
-              isProving={isProving}
-              stepMessage={provingStep}
+            <DistributionMap
+              project={activeProject}
+              onVerifyClick={async () => {
+                await verifyAllocationProof(activeProject.id, 2500, 25);
+              }}
             />
-
-            {/* Step 2: Participant Private Allocation Prover */}
-            <AllocationProver
-              currentRuleType={contractState.ruleType}
-              totalPoolAmount={contractState.totalPoolAmount}
-              participantCount={contractState.participantCount}
-              onVerifyProof={verifyAllocationProof}
+            <ZKProofPipeline
               isProving={isProving}
-              provingStep={provingStep}
-            />
-
-            {/* Step 3: Public Ledger Settlement & Verifier Audit */}
-            <PublicLedgerView
-              contractState={contractState}
-              logs={logs}
-              onFinalize={finalizePool}
-              isProving={isProving}
+              currentStepMessage={provingStep}
             />
           </div>
-        </section>
+        )}
+
+        {currentTab === 'contributors' && (
+          <ContributorsView
+            project={activeProject}
+            isProving={isProving}
+          />
+        )}
+
+        {currentTab === 'proofs' && (
+          <div className="space-y-6">
+            <ZKProofPipeline
+              isProving={isProving}
+              currentStepMessage={provingStep}
+            />
+            <ProofsView logs={logs} network={network} />
+          </div>
+        )}
+
+        {currentTab === 'treasury' && (
+          <TreasuryView projects={projects} network={network} />
+        )}
+
+        {currentTab === 'verify' && (
+          <PublicVerifyView projects={projects} network={network} />
+        )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}

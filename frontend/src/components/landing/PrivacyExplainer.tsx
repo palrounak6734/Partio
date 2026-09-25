@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Lock, Eye, ShieldCheck } from 'lucide-react';
 
 export const PrivacyExplainer: React.FC = () => {
@@ -10,7 +11,7 @@ export const PrivacyExplainer: React.FC = () => {
   ];
 
   const publicFields = [
-    { name: 'Distribution Pool ID & State', why: 'Auditable identifier so contributors know which distribution is active.' },
+    { name: 'Partition Pool ID & State', why: 'Auditable identifier so contributors know which partition is active.' },
     { name: 'Total Pool Capacity', why: 'Committed by organizer so arithmetic ceiling boundaries are verifiable.' },
     { name: 'Configured Rule Identifier', why: 'Indicates whether percentage, equal, or capped circuit logic applies.' },
     { name: 'Verified Allocations Counter', why: 'Audit counter tracking how many participants have submitted valid proofs.' },
@@ -22,74 +23,100 @@ export const PrivacyExplainer: React.FC = () => {
     <section className="py-14">
       <div className="app-container">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-medium text-emerald-300 mb-3">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-xs font-semibold text-emerald-300 mb-3 shadow-sm"
+          >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Dual-State Privacy Boundary</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          </motion.div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             What Observers Learn vs. What Remains Secret
           </h2>
-          <p className="text-sm text-slate-400 mt-2">
-            In Midnight Compact, privacy is enforced mathematically. Data only crosses into the public domain via deliberate <code className="text-emerald-300 font-mono">disclose()</code> statements.
+          <p className="text-sm text-slate-300 mt-2 font-medium">
+            In Midnight Compact, privacy is enforced mathematically. Data only crosses into the public domain via deliberate <code className="text-emerald-300 font-mono font-bold">disclose()</code> statements.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Private / Local Enclave */}
-          <div className="p-6 rounded-2xl bg-titanium-850/90 border border-amber-500/20 shadow-xl shadow-amber-500/5">
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-800">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+          <motion.div 
+            initial={{ opacity: 0, x: -15 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="p-6 rounded-2xl bg-[#162334]/90 border border-amber-500/30 shadow-xl shadow-amber-500/5 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-700/60">
+              <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-300">
                 <Lock className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">Private State (Local Client RAM Only)</h3>
-                <p className="text-xs text-slate-400">Never broadcast, never stored in blocks, zero leakage</p>
+                <p className="text-xs text-slate-300">Never broadcast, never stored in blocks, zero leakage</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {privateFields.map((field, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-titanium-900/80 border border-slate-800/80">
+                <motion.div 
+                  key={i} 
+                  whileHover={{ x: 3 }}
+                  className="p-3.5 rounded-xl bg-[#1c2c40]/90 border border-slate-700/60 transition-all"
+                >
                   <div className="flex items-center gap-2 font-semibold text-xs text-amber-300 mb-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                     <span>{field.name}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed pl-3.5">
+                  <p className="text-[11px] text-slate-300 leading-relaxed pl-3.5 font-normal">
                     {field.why}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Public / On-Chain State */}
-          <div className="p-6 rounded-2xl bg-titanium-850/90 border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-800">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+          <motion.div 
+            initial={{ opacity: 0, x: 15 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="p-6 rounded-2xl bg-[#162334]/90 border border-emerald-500/30 shadow-xl shadow-emerald-500/5 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-700/60">
+              <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-emerald-300">
                 <Eye className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">Public State (On-Chain Settlement)</h3>
-                <p className="text-xs text-slate-400">Verifiable by all validators, auditors, and indexers on Preprod</p>
+                <p className="text-xs text-slate-300">Verifiable by all validators, auditors, and indexers on Preprod</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {publicFields.map((field, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-titanium-900/80 border border-slate-800/80">
+                <motion.div 
+                  key={i} 
+                  whileHover={{ x: 3 }}
+                  className="p-3.5 rounded-xl bg-[#1c2c40]/90 border border-slate-700/60 transition-all"
+                >
                   <div className="flex items-center gap-2 font-semibold text-xs text-emerald-300 mb-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     <span>{field.name}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed pl-3.5">
+                  <p className="text-[11px] text-slate-300 leading-relaxed pl-3.5 font-normal">
                     {field.why}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
   );
 };
+

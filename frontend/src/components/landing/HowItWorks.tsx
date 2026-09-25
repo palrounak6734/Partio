@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Sliders, Cpu, CheckCircle } from 'lucide-react';
 
 export const HowItWorks: React.FC = () => {
@@ -25,36 +26,40 @@ export const HowItWorks: React.FC = () => {
       icon: CheckCircle,
       description: 'Midnight Substrate validators verify the mathematical validity of the proof against the verification key on Preprod. Payout compliance is recorded with ZERO amount disclosure.',
       tag: 'Selective Disclosure',
-      accent: 'border-purple-500/30 text-purple-400 bg-purple-500/10',
+      accent: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10',
     },
   ];
 
   return (
-    <section className="py-14 border-y border-slate-800/80 bg-titanium-950/60">
+    <section className="py-14 border-y border-slate-700/60 bg-[#131d2a]/70 rounded-3xl my-6">
       <div className="app-container">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs uppercase tracking-widest font-bold text-emerald-400">Cryptographic Architecture</span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-            How Zero-Knowledge Splits Work
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+            How Zero-Knowledge Partitions Work
           </h2>
-          <p className="text-sm text-slate-400 mt-2">
+          <p className="text-sm text-slate-300 mt-2 font-medium">
             Dual-state execution separating off-chain private witness evaluation from on-chain public settlement
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {steps.map((step) => {
+          {steps.map((step, idx) => {
             const Icon = step.icon;
             return (
-              <div
+              <motion.div
                 key={step.num}
-                className="relative p-6 rounded-2xl bg-titanium-850/80 border border-slate-800/80 hover:border-emerald-500/40 transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.1, ease: 'easeOut' }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="relative p-6 rounded-2xl bg-[#172435]/90 border border-slate-700/60 hover:border-emerald-400/50 transition-all duration-300 group shadow-xl hover:shadow-[0_0_24px_rgba(16,185,129,0.12)]"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-3xl font-extrabold font-mono text-slate-700 group-hover:text-emerald-400/80 transition-colors">
+                  <span className="text-3xl font-extrabold font-mono text-slate-600 group-hover:text-emerald-400/80 transition-colors">
                     {step.num}
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-800">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#101723] text-slate-300 border border-slate-700/70">
                     {step.tag}
                   </span>
                 </div>
@@ -63,15 +68,15 @@ export const HowItWorks: React.FC = () => {
                   <div className={`p-2.5 rounded-xl border ${step.accent}`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-100 group-hover:text-emerald-200 transition-colors">
+                  <h3 className="text-base font-bold text-white group-hover:text-emerald-200 transition-colors">
                     {step.title}
                   </h3>
                 </div>
 
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-300 leading-relaxed font-normal">
                   {step.description}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -79,3 +84,4 @@ export const HowItWorks: React.FC = () => {
     </section>
   );
 };
+
