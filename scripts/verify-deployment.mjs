@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
 console.log('================================================================');
-console.log('       SplitShield Smart Contract Deployment Verifier           ');
+console.log('          Partio Smart Contract Deployment Verifier             ');
 console.log('================================================================\n');
 
 const circuits = [
