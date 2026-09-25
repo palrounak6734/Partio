@@ -142,6 +142,17 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
             <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
               If your mobile browser does not inject browser extensions, open the dApp inside your wallet's built-in web3 browser or get the app:
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                const cip158Url = `web+cardano://browse/v1?uri=${encodeURIComponent(window.location.href)}`;
+                window.location.href = cip158Url;
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-xs font-semibold text-emerald-300 border border-emerald-500/40 mb-2.5 transition-all shadow-sm"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Open in Mobile Wallet App (CIP-158)</span>
+            </button>
             <div className="flex gap-2">
               <a
                 href={mobileLinks.oneAim.url}

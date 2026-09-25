@@ -1,12 +1,42 @@
-export const MIDNIGHT_CONFIG = {
-  network: (import.meta.env.VITE_MIDNIGHT_NETWORK || 'preprod') as 'preprod' | 'preview',
-  rpcUrl: import.meta.env.VITE_MIDNIGHT_RPC_URL || 'https://rpc.preprod.midnight.network',
-  indexerUrl: import.meta.env.VITE_INDEXER_URL || 'https://indexer.preprod.midnight.network/api/v4/graphql',
-  indexerWsUrl: import.meta.env.VITE_INDEXER_WS_URL || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws',
-  contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS || 'ac973a5c3626dc9535f5aac0fd38607132968c0b4e1d751ffdd356d06b1d00a3',
-  explorerUrl: import.meta.env.VITE_EXPLORER_URL || 'https://midnightexplorer.com',
-  faucetUrl: 'https://midnight-tmnight-preprod.nethermind.dev',
+export type NetworkId = 'preview' | 'preprod';
+
+export interface NetworkConfig {
+  id: NetworkId;
+  name: string;
+  rpcUrl: string;
+  indexerUrl: string;
+  indexerWsUrl: string;
+  explorerUrl: string;
+  faucetUrl: string;
+  contractAddress: string;
+}
+
+export const NETWORK_CONFIGS: Record<NetworkId, NetworkConfig> = {
+  preview: {
+    id: 'preview',
+    name: 'Preview Testnet',
+    rpcUrl: 'wss://rpc.preview.midnight.network',
+    indexerUrl: 'https://indexer.preview.midnight.network/api/v4/graphql',
+    indexerWsUrl: 'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
+    explorerUrl: 'https://preview.midnightexplorer.com',
+    faucetUrl: 'https://midnight-tmnight-preview.nethermind.dev/',
+    contractAddress: 'ac973a5c3626dc9535f5aac0fd38607132968c0b4e1d751ffdd356d06b1d00a3',
+  },
+  preprod: {
+    id: 'preprod',
+    name: 'Preprod Testnet',
+    rpcUrl: 'wss://rpc.preprod.midnight.network',
+    indexerUrl: 'https://indexer.preprod.midnight.network/api/v4/graphql',
+    indexerWsUrl: 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws',
+    explorerUrl: 'https://midnightexplorer.com',
+    faucetUrl: 'https://midnight-tmnight-preprod.nethermind.dev/',
+    contractAddress: '26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e',
+  },
 };
+
+export const DEFAULT_NETWORK: NetworkId = 'preprod';
+
+export const MIDNIGHT_CONFIG = NETWORK_CONFIGS.preprod;
 
 export interface DistributionRule {
   id: number;
@@ -43,3 +73,10 @@ export const DISTRIBUTION_RULES: DistributionRule[] = [
     privacyClaim: 'Proves contributor does not exceed regulatory or grant tier ceilings without publishing amount.'
   }
 ];
+
+export const APP_CONFIG = {
+  appName: 'Partio',
+  tagline: 'Private Financial Operations & Payment Partitioning on Midnight',
+  proofServerUrl: 'http://127.0.0.1:6300',
+  maxCircuits: 10,
+};
