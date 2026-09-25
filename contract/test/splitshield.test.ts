@@ -2,291 +2,277 @@ import { describe, it, expect } from 'vitest';
 import { Contract, ledger } from '../managed/contract/index.js';
 import { createCircuitContext, dummyContractAddress } from '@midnight-ntwrk/compact-runtime';
 
-describe('SplitShield Zero-Knowledge Smart Contract & Circuits', () => {
-  const coinPublicKey = { bytes: new Uint8Array(32) };
+describe('SplitShield Multi-Project Zero-Knowledge Smart Contract & Circuits', () => {
+  const ownerPublicKey = { bytes: new Uint8Array(32).fill(1) };
+  const contributorPublicKey = { bytes: new Uint8Array(32).fill(2) };
+  const attackerPublicKey = { bytes: new Uint8Array(32).fill(99) };
 
-  function getInitialCircuitContext(contract: Contract<any>) {
-    const initResult = contract.initialState({
-      initialPrivateState: {},
-      initialZswapLocalState: {
-        coinPublicKey,
-        currentIndex: 0n,
-        inputs: [],
-        outputs: [],
-      },
-    });
+  const testProjectId = new Uint8Array(32).fill(7);
+  const testRuleHash = new Uint8Array(32).fill(8);
+
+  function createTestContext(contract: Contract<any>, callerKey = ownerPublicKey, stateData?: any) {
+    if (!stateData) {
+      const initResult = contract.initialState({
+        initialPrivateState: {},
+        initialZswapLocalState: {
+          coinPublicKey: callerKey,
+          currentIndex: 0n,
+          inputs: [],
+          outputs: [],
+        },
+      });
+      stateData = initResult.currentContractState.data;
+    }
+
     return createCircuitContext(
       dummyContractAddress(),
-      coinPublicKey,
-      initResult.currentContractState.data,
-      initResult.currentPrivateState,
+      callerKey,
+      stateData,
+      {},
     );
   }
 
-  describe('Circuit 1: initializeDistribution (Organizer)', () => {
-    it('1. successfully initializes pool with percentage split rule', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 100n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
+  function getBaseContract(overrides: Partial<{
+    poolAmount: bigint;
+    allocAmount: bigint;
+    allocPct: bigint;
+    totalPct: bigint;
+    blinding: Uint8Array;
+  }> = {}) {
+    return new Contract({
+      getPoolAmount: (ctx) => [ctx.privateState, overrides.poolAmount ?? 10000n],
+      getAllocationAmount: (ctx) => [ctx.privateState, overrides.allocAmount ?? 2500n],
+      getAllocationPercentage: (ctx) => [ctx.privateState, overrides.allocPct ?? 25n],
+      getTotalPercentage: (ctx) => [ctx.privateState, overrides.totalPct ?? 100n],
+      getBlindingFactor: (ctx) => [ctx.privateState, overrides.blinding ?? new Uint8Array(32).fill(42)],
+    });
+  }
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const timestamp = 1788900001n;
-      const res = contract.impureCircuits.initializeDistribution(initialCtx, 1n, 10000n, 5n, timestamp);
+  describe('Circuit 1: createProject', () => {
+    it('successfully creates a project with pool commitment and owner registration', () => {
+      const contract = getBaseContract();
+      const ctx = createTestContext(contract, ownerPublicKey);
 
-      expect(res.result).toBe(true);
+      const res = contract.impureCircuits.createProject(ctx, testProjectId);
       const currentLedger = ledger(res.context.currentQueryContext.state);
-      expect(currentLedger.distributionStatus).toBe(1n); // Active
-      expect(currentLedger.ruleType).toBe(1n);          // Percentage Split
-      expect(currentLedger.totalPoolAmount).toBe(10000n);
-      expect(currentLedger.participantCount).toBe(5n);
-      expect(currentLedger.verifiedAllocationsCount).toBe(0n);
-      expect(currentLedger.lastVerifiedTimestamp).toBe(timestamp);
-      expect(currentLedger.verificationResult).toBe(false);
-    });
 
-    it('2. successfully initializes pool with equal split rule', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 250n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      const res = contract.impureCircuits.initializeDistribution(initialCtx, 2n, 1000n, 4n, 1788900002n);
-
-      expect(res.result).toBe(true);
-      const currentLedger = ledger(res.context.currentQueryContext.state);
-      expect(currentLedger.distributionStatus).toBe(1n);
-      expect(currentLedger.ruleType).toBe(2n);
-      expect(currentLedger.totalPoolAmount).toBe(1000n);
-      expect(currentLedger.participantCount).toBe(4n);
-    });
-
-    it('3. rejects initialization with zero pool amount', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 0n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      expect(() => {
-        contract.impureCircuits.initializeDistribution(initialCtx, 1n, 0n, 5n, 1788900003n);
-      }).toThrow(/Total pool amount must be greater than zero/);
-    });
-
-    it('4. rejects initialization with zero participants', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 100n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      expect(() => {
-        contract.impureCircuits.initializeDistribution(initialCtx, 1n, 5000n, 0n, 1788900004n);
-      }).toThrow(/Participant count must be greater than zero/);
-    });
-
-    it('5. rejects initialization with invalid rule type', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 100n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      expect(() => {
-        contract.impureCircuits.initializeDistribution(initialCtx, 99n, 5000n, 3n, 1788900005n);
-      }).toThrow(/Rule type must be 1/);
+      expect(currentLedger.projectCount).toBe(1n);
+      expect(currentLedger.totalProjectsCreated).toBe(1n);
+      expect(currentLedger.projectOwners.member(testProjectId)).toBe(true);
+      expect(currentLedger.projectOwners.lookup(testProjectId)).toEqual(ownerPublicKey.bytes);
+      expect(currentLedger.poolCommitments.member(testProjectId)).toBe(true);
+      expect(currentLedger.distributionStatus.lookup(testProjectId)).toBe(0n); // ACTIVE
     });
   });
 
-  describe('Circuit 2: verifyAllocation (General ZK Constraint Proof)', () => {
-    it('6. proves valid private allocation within pool bounds and updates nullifier', () => {
-      const allocation = 2500n;
-      const secret = new Uint8Array(32).fill(7);
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, allocation],
-        getParticipantSecret: (ctx) => [ctx.privateState, secret],
-      });
+  describe('Circuit 2: defineRules', () => {
+    it('allows project owner to define allocation rules commitment', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, 10000n, 4n, 1788900010n);
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.defineRules(ctx2, testProjectId, testRuleHash);
+      const currentLedger = ledger(res2.context.currentQueryContext.state);
 
-      const timestamp = 1788900020n;
-      const verifyRes = contract.impureCircuits.verifyAllocation(initRes.context, timestamp);
-
-      expect(verifyRes.result).toBe(true);
-      const publicLedger = ledger(verifyRes.context.currentQueryContext.state);
-      expect(publicLedger.verificationResult).toBe(true);
-      expect(publicLedger.verifiedAllocationsCount).toBe(1n);
-      expect(publicLedger.lastVerifiedTimestamp).toBe(timestamp);
-      expect(publicLedger.lastVerifiedAllocationHash).toBeDefined();
-      expect(publicLedger.lastVerifiedAllocationHash.length).toBe(32);
+      expect(currentLedger.ruleCommitments.member(testProjectId)).toBe(true);
+      expect(currentLedger.ruleCommitments.lookup(testProjectId)).toEqual(testRuleHash);
     });
 
-    it('7. rejects private allocation that exceeds the total pool', () => {
-      const excessiveAllocation = 15000n;
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, excessiveAllocation],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
+    it('rejects rule definition from non-owner unauthorized caller', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, 10000n, 4n, 1788900030n);
-
+      const ctxAttacker = createTestContext(contract, attackerPublicKey, res1.context.currentQueryContext.state);
       expect(() => {
-        contract.impureCircuits.verifyAllocation(initRes.context, 1788900031n);
-      }).toThrow(/Allocation amount exceeds total pool/);
+        contract.impureCircuits.defineRules(ctxAttacker, testProjectId, testRuleHash);
+      }).toThrow();
     });
 
-    it('8. rejects zero allocation amount', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 0n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, 10000n, 4n, 1788900035n);
+    it('rejects rule definition for non-existent project', () => {
+      const contract = getBaseContract();
+      const ctx = createTestContext(contract, ownerPublicKey);
+      const randomProjectId = new Uint8Array(32).fill(99);
 
       expect(() => {
-        contract.impureCircuits.verifyAllocation(initRes.context, 1788900036n);
-      }).toThrow(/Allocation amount must be greater than zero/);
+        contract.impureCircuits.defineRules(ctx, randomProjectId, testRuleHash);
+      }).toThrow();
     });
   });
 
-  describe('Circuit 3: verifyPercentageSplit (Percentage Rule)', () => {
-    it('9. proves private allocation matches exact percentage split (35% of 10000 = 3500)', () => {
-      const allocation = 3500n;
-      const percentage = 35n;
-      const totalPool = 10000n;
-      const secret = new Uint8Array(32).fill(42);
+  describe('Circuit 3: addContributor', () => {
+    it('allows project owner to register a contributor public key hash', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, allocation],
-        getParticipantSecret: (ctx) => [ctx.privateState, secret],
-      });
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.addContributor(ctx2, testProjectId, contributorPublicKey.bytes);
+      const currentLedger = ledger(res2.context.currentQueryContext.state);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, totalPool, 3n, 1788900040n);
-
-      const verifyRes = contract.impureCircuits.verifyPercentageSplit(initRes.context, percentage, 1788900041n);
-      expect(verifyRes.result).toBe(true);
-
-      const publicLedger = ledger(verifyRes.context.currentQueryContext.state);
-      expect(publicLedger.verificationResult).toBe(true);
-      expect(publicLedger.verifiedAllocationsCount).toBe(1n);
+      expect(currentLedger.contributorRegistry.isEmpty()).toBe(false);
     });
 
-    it('10. rejects private allocation when it violates the percentage split', () => {
-      const mismatchedAllocation = 3000n; // 3000 != 35% of 10000
-      const percentage = 35n;
-      const totalPool = 10000n;
+    it('rejects contributor registration from non-owner caller', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, mismatchedAllocation],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, totalPool, 3n, 1788900045n);
-
+      const ctxAttacker = createTestContext(contract, attackerPublicKey, res1.context.currentQueryContext.state);
       expect(() => {
-        contract.impureCircuits.verifyPercentageSplit(initRes.context, percentage, 1788900046n);
-      }).toThrow(/Private allocation does not match percentage share/);
+        contract.impureCircuits.addContributor(ctxAttacker, testProjectId, contributorPublicKey.bytes);
+      }).toThrow();
     });
   });
 
-  describe('Circuit 4: verifyEqualSplit (Equal Split Rule)', () => {
-    it('11. proves private allocation matches equal split (12000 pool / 4 participants = 3000 each)', () => {
-      const equalShare = 3000n;
-      const totalPool = 12000n;
-      const numParticipants = 4n;
+  describe('Circuit 4: allocateFunds (Value Conservation)', () => {
+    it('successfully transitions project to DISTRIBUTING when total percentage equals 100%', () => {
+      const contract = getBaseContract({ allocPct: 25n, totalPct: 100n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, equalShare],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32).fill(9)],
-      });
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.allocateFunds(ctx2, testProjectId);
+      const currentLedger = ledger(res2.context.currentQueryContext.state);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 2n, totalPool, numParticipants, 1788900050n);
-
-      const verifyRes = contract.impureCircuits.verifyEqualSplit(initRes.context, 1788900051n);
-      expect(verifyRes.result).toBe(true);
-
-      const publicLedger = ledger(verifyRes.context.currentQueryContext.state);
-      expect(publicLedger.verificationResult).toBe(true);
-      expect(publicLedger.verifiedAllocationsCount).toBe(1n);
+      expect(currentLedger.distributionStatus.lookup(testProjectId)).toBe(1n); // DISTRIBUTING
     });
 
-    it('12. rejects equal split when private allocation deviates from equal share', () => {
-      const incorrectShare = 3500n;
-      const totalPool = 12000n;
-      const numParticipants = 4n;
+    it('rejects allocation when sum of percentages does NOT equal 100% (Conservation Failure)', () => {
+      const contract = getBaseContract({ allocPct: 25n, totalPct: 90n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, incorrectShare],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
-
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 2n, totalPool, numParticipants, 1788900055n);
-
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
       expect(() => {
-        contract.impureCircuits.verifyEqualSplit(initRes.context, 1788900056n);
-      }).toThrow(/Private allocation does not match equal participant share/);
+        contract.impureCircuits.allocateFunds(ctx2, testProjectId);
+      }).toThrow('Total allocation must equal 100%');
+    });
+
+    it('rejects allocation when individual allocation percentage is 0', () => {
+      const contract = getBaseContract({ allocPct: 0n, totalPct: 100n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.allocateFunds(ctx2, testProjectId);
+      }).toThrow('Allocation percentage must be positive');
     });
   });
 
-  describe('Circuit 5: finalizeDistribution (Organizer)', () => {
-    it('13. transitions active distribution pool to Finalized state', () => {
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, 1000n],
-        getParticipantSecret: (ctx) => [ctx.privateState, new Uint8Array(32)],
-      });
+  describe('Circuit 5: verifyAllocation (ZK Constraint Verification)', () => {
+    it('verifies private allocation in zero-knowledge when ratio matches rules', () => {
+      // 2500 * 100 == 10000 * 25
+      const contract = getBaseContract({ poolAmount: 10000n, allocAmount: 2500n, allocPct: 25n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 2n, 4000n, 4n, 1788900060n);
-      const finalizeRes = contract.impureCircuits.finalizeDistribution(initRes.context, 1788900070n);
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.addContributor(ctx2, testProjectId, contributorPublicKey.bytes);
 
-      expect(finalizeRes.result).toBe(true);
-      const publicLedger = ledger(finalizeRes.context.currentQueryContext.state);
-      expect(publicLedger.distributionStatus).toBe(2n); // Finalized
-      expect(publicLedger.lastVerifiedTimestamp).toBe(1788900070n);
+      const ctxContributor = createTestContext(contract, contributorPublicKey, res2.context.currentQueryContext.state);
+      const res3 = contract.impureCircuits.verifyAllocation(ctxContributor, testProjectId);
+      const currentLedger = ledger(res3.context.currentQueryContext.state);
+
+      expect(currentLedger.totalAllocationsVerified).toBe(1n);
+    });
+
+    it('rejects verification if contributor is not registered', () => {
+      const contract = getBaseContract({ poolAmount: 10000n, allocAmount: 2500n, allocPct: 25n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      // Caller is contributor, but owner never called addContributor
+      const ctxContributor = createTestContext(contract, contributorPublicKey, res1.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.verifyAllocation(ctxContributor, testProjectId);
+      }).toThrow('Contributor not registered');
+    });
+
+    it('rejects verification if private allocation amount does not match percentage share', () => {
+      // Fraudulent claim: Claiming 3000 instead of 2500 (3000 * 100 != 10000 * 25)
+      const contract = getBaseContract({ poolAmount: 10000n, allocAmount: 3000n, allocPct: 25n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.addContributor(ctx2, testProjectId, contributorPublicKey.bytes);
+
+      const ctxContributor = createTestContext(contract, contributorPublicKey, res2.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.verifyAllocation(ctxContributor, testProjectId);
+      }).toThrow('Allocation does not match agreed percentage');
     });
   });
 
-  describe('Privacy Invariant Verification', () => {
-    it('14. verifies that private witness data is never stored in public ledger', () => {
-      const secretAllocation = 7777n;
-      const secretKey = new Uint8Array(32).fill(99);
+  describe('Circuit 6: finalizeDistribution & Circuit 8: getProjectStatus', () => {
+    it('owner successfully finalizes distribution setting status to COMPLETED (2)', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      const contract = new Contract({
-        getParticipantAllocation: (ctx) => [ctx.privateState, secretAllocation],
-        getParticipantSecret: (ctx) => [ctx.privateState, secretKey],
-      });
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.finalizeDistribution(ctx2, testProjectId);
 
-      const initialCtx = getInitialCircuitContext(contract);
-      const initRes = contract.impureCircuits.initializeDistribution(initialCtx, 1n, 10000n, 2n, 1788900080n);
-      const verifyRes = contract.impureCircuits.verifyAllocation(initRes.context, 1788900081n);
+      const ctx3 = createTestContext(contract, ownerPublicKey, res2.context.currentQueryContext.state);
+      const statusRes = contract.impureCircuits.getProjectStatus(ctx3, testProjectId);
 
-      const publicLedger = ledger(verifyRes.context.currentQueryContext.state);
+      expect(statusRes.result).toBe(2n); // 2 = COMPLETED
+      const currentLedger = ledger(statusRes.context.currentQueryContext.state);
+      expect(currentLedger.distributionStatus.lookup(testProjectId)).toBe(2n);
+    });
 
-      // Verify presence of legitimate public ledger properties
-      expect(publicLedger).toHaveProperty('distributionStatus');
-      expect(publicLedger).toHaveProperty('ruleType');
-      expect(publicLedger).toHaveProperty('totalPoolAmount');
-      expect(publicLedger).toHaveProperty('participantCount');
-      expect(publicLedger).toHaveProperty('verifiedAllocationsCount');
-      expect(publicLedger).toHaveProperty('lastVerifiedTimestamp');
-      expect(publicLedger).toHaveProperty('lastVerifiedAllocationHash');
-      expect(publicLedger).toHaveProperty('verificationResult');
+    it('rejects finalization by unauthorized non-owner caller', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
 
-      // CRITICAL PRIVACY INVARIANT: Secret witness values must NEVER exist on public ledger
-      expect((publicLedger as any).getParticipantAllocation).toBeUndefined();
-      expect((publicLedger as any).getParticipantSecret).toBeUndefined();
-      expect((publicLedger as any).participantAllocation).toBeUndefined();
-      expect((publicLedger as any).myAllocation).toBeUndefined();
-      expect((publicLedger as any).secretAllocation).toBeUndefined();
-      expect((publicLedger as any).secretKey).toBeUndefined();
+      const ctxAttacker = createTestContext(contract, attackerPublicKey, res1.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.finalizeDistribution(ctxAttacker, testProjectId);
+      }).toThrow();
+    });
+  });
+
+  describe('Circuit 7: claimPayment', () => {
+    it('allows verified contributor to claim after project is finalized', () => {
+      const contract = getBaseContract({ poolAmount: 10000n, allocAmount: 2500n, allocPct: 25n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.addContributor(ctx2, testProjectId, contributorPublicKey.bytes);
+
+      const ctxContrib = createTestContext(contract, contributorPublicKey, res2.context.currentQueryContext.state);
+      const res3 = contract.impureCircuits.verifyAllocation(ctxContrib, testProjectId);
+
+      const ctxOwnerFinalize = createTestContext(contract, ownerPublicKey, res3.context.currentQueryContext.state);
+      const res4 = contract.impureCircuits.finalizeDistribution(ctxOwnerFinalize, testProjectId);
+
+      const ctxContribClaim = createTestContext(contract, contributorPublicKey, res4.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.claimPayment(ctxContribClaim, testProjectId);
+      }).not.toThrow();
+    });
+
+    it('rejects claim if distribution has not yet been finalized', () => {
+      const contract = getBaseContract({ poolAmount: 10000n, allocAmount: 2500n, allocPct: 25n });
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.addContributor(ctx2, testProjectId, contributorPublicKey.bytes);
+
+      const ctxContrib = createTestContext(contract, contributorPublicKey, res2.context.currentQueryContext.state);
+      const res3 = contract.impureCircuits.verifyAllocation(ctxContrib, testProjectId);
+
+      // Attempt claim before finalizeDistribution
+      const ctxContribEarlyClaim = createTestContext(contract, contributorPublicKey, res3.context.currentQueryContext.state);
+      expect(() => {
+        contract.impureCircuits.claimPayment(ctxContribEarlyClaim, testProjectId);
+      }).toThrow('Distribution not yet finalized');
     });
   });
 });

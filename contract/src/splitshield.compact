@@ -2,127 +2,134 @@ pragma language_version >= 0.23.0;
 
 import CompactStandardLibrary;
 
-// ─── PUBLIC LEDGER STATE (On-Chain Settlement) ──────────────────────────────
-// Visible to all observers, nodes, and auditors on Midnight
-export ledger distributionStatus: Uint<64>;          // 0 = Inactive, 1 = Active, 2 = Finalized, 3 = Disputed
-export ledger ruleType: Uint<64>;                    // 1 = Percentage Split, 2 = Equal Split, 3 = Capped Allocation
-export ledger totalPoolAmount: Uint<64>;             // Total project allocation pool amount
-export ledger participantCount: Uint<64>;            // Number of authorized participants
-export ledger verifiedAllocationsCount: Uint<64>;    // Total count of verified participant proofs
-export ledger lastVerifiedTimestamp: Uint<64>;       // Most recent verification timestamp
-export ledger lastVerifiedAllocationHash: Bytes<32>; // Nullifier/hash of last verified allocation
-export ledger verificationResult: Boolean;           // Boolean outcome of last verification
+// =============================================================================
+// PUBLIC LEDGER STATE (On-Chain Settlement)
+// =============================================================================
+export ledger projectCount: Counter;
+export ledger totalProjectsCreated: Counter;
+export ledger totalAllocationsVerified: Counter;
 
-// ─── PRIVATE OFF-CHAIN WITNESS FUNCTIONS ─────────────────────────────────────
-// Evaluated exclusively inside the client's local memory / browser wallet
-// Raw witness values NEVER cross the network or appear on-chain
-witness getParticipantAllocation(): Uint<64>;
-witness getParticipantSecret(): Bytes<32>;
+export ledger projectOwners: Map<Bytes<32>, Bytes<32>>;        // projectId -> ownerPubKeyHash
+export ledger poolCommitments: Map<Bytes<32>, Bytes<32>>;      // projectId -> hash([blinding, projectId])
+export ledger ruleCommitments: Map<Bytes<32>, Bytes<32>>;      // projectId -> hash(ruleSet)
+export ledger contributorRegistry: Map<Bytes<32>, Boolean>;    // hash([projectId, pubKey]) -> registered
+export ledger allocationVerified: Map<Bytes<32>, Boolean>;     // hash([projectId, pubKey]) -> verified
+export ledger distributionStatus: Map<Bytes<32>, Uint<64>>;    // projectId -> 0=ACTIVE, 1=DISTRIBUTING, 2=COMPLETED
 
-// ─── CIRCUIT 1: Initialize Distribution (Organizer) ─────────────────────────
-// Establishes a new distribution pool with public parameters and rule constraints
-export circuit initializeDistribution(
-    rule: Uint<64>,
-    totalPool: Uint<64>,
-    numParticipants: Uint<64>,
-    currentTimestamp: Uint<64>
-): Boolean {
-    assert(distributionStatus == 0 || distributionStatus == 2, "Distribution pool is currently active");
-    assert(totalPool > 0, "Total pool amount must be greater than zero");
-    assert(numParticipants > 0, "Participant count must be greater than zero");
-    assert(rule >= 1 && rule <= 3, "Rule type must be 1 (Percentage), 2 (Equal), or 3 (Capped)");
+// =============================================================================
+// PRIVATE WITNESSES (Client-side, Never On-Chain)
+// =============================================================================
+witness getPoolAmount(): Uint<64>;
+witness getAllocationAmount(): Uint<64>;
+witness getAllocationPercentage(): Uint<64>;
+witness getTotalPercentage(): Uint<64>;
+witness getBlindingFactor(): Bytes<32>;
 
-    ruleType = disclose(rule);
-    totalPoolAmount = disclose(totalPool);
-    participantCount = disclose(numParticipants);
-    verifiedAllocationsCount = 0;
-    distributionStatus = 1;
-    verificationResult = false;
-    lastVerifiedTimestamp = disclose(currentTimestamp);
-    return true;
+// =============================================================================
+// CONSTRUCTOR
+// =============================================================================
+constructor() {
 }
 
-// ─── CIRCUIT 2: Verify Allocation (General Constraint Proof) ─────────────────
-// Proves in zero-knowledge that the private allocation is within the pool bounds
-// without disclosing the exact payout amount to any party
-export circuit verifyAllocation(
-    currentTimestamp: Uint<64>
-): Boolean {
-    assert(distributionStatus == 1, "Distribution pool must be active");
-
-    const myAllocation = getParticipantAllocation();
-    assert(myAllocation > 0, "Allocation amount must be greater than zero");
-    assert(myAllocation <= totalPoolAmount, "Allocation amount exceeds total pool");
-
-    const mySecret = getParticipantSecret();
-    const nullifier = persistentHash<Bytes<32>>(mySecret);
-
-    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
-    lastVerifiedAllocationHash = disclose(nullifier);
-    lastVerifiedTimestamp = disclose(currentTimestamp);
-    verificationResult = true;
-
-    return disclose(verificationResult);
+// =============================================================================
+// INTERNAL HELPERS
+// =============================================================================
+circuit callerKey(): Bytes<32> {
+    return disclose(ownPublicKey().bytes);
 }
 
-// ─── CIRCUIT 3: Verify Percentage Split Rule ────────────────────────────────
-// Proves that the private allocation matches exactly the percentage share:
-// myAllocation * 100 == totalPoolAmount * percentage
-// Zero-knowledge constraint without division
-export circuit verifyPercentageSplit(
-    percentage: Uint<64>,
-    currentTimestamp: Uint<64>
-): Boolean {
-    assert(distributionStatus == 1, "Distribution pool must be active");
-    assert(ruleType == 1, "Distribution rule is not configured for Percentage Split");
-    assert(percentage > 0, "Percentage share must be greater than zero");
-    assert(percentage <= 100, "Percentage share cannot exceed 100");
+// =============================================================================
+// EXPORTED CIRCUITS (8 Total <= 10 Circuit Budget)
+// =============================================================================
 
-    const myAllocation = getParticipantAllocation();
-    assert(myAllocation * 100 == totalPoolAmount * percentage, "Private allocation does not match percentage share");
+// 1. Initialize a new payment project with pool commitment
+export circuit createProject(projectId: Bytes<32>): [] {
+    const owner = callerKey();
+    const blinding = getBlindingFactor();
+    const poolCommit = persistentHash<[Bytes<32>, Bytes<32>]>([blinding, projectId]);
 
-    const mySecret = getParticipantSecret();
-    const nullifier = persistentHash<Bytes<32>>(mySecret);
-
-    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
-    lastVerifiedAllocationHash = disclose(nullifier);
-    lastVerifiedTimestamp = disclose(currentTimestamp);
-    verificationResult = true;
-
-    return disclose(verificationResult);
+    projectOwners.insert(disclose(projectId), owner);
+    poolCommitments.insert(disclose(projectId), disclose(poolCommit));
+    distributionStatus.insert(disclose(projectId), 0);
+    projectCount.increment(1);
+    totalProjectsCreated.increment(1);
 }
 
-// ─── CIRCUIT 4: Verify Equal Split Rule ─────────────────────────────────────
-// Proves that the private allocation matches an equal share:
-// myAllocation * participantCount == totalPoolAmount
-// Zero-knowledge constraint without division
-export circuit verifyEqualSplit(
-    currentTimestamp: Uint<64>
-): Boolean {
-    assert(distributionStatus == 1, "Distribution pool must be active");
-    assert(ruleType == 2, "Distribution rule is not configured for Equal Split");
+// 2. Define allocation rules for a project
+export circuit defineRules(projectId: Bytes<32>, ruleHash: Bytes<32>): [] {
+    const caller = callerKey();
+    assert(projectOwners.member(disclose(projectId)), "Project not found");
+    assert(projectOwners.lookup(disclose(projectId)) == caller, "Only owner can define rules");
 
-    const myAllocation = getParticipantAllocation();
-    assert(myAllocation * participantCount == totalPoolAmount, "Private allocation does not match equal participant share");
-
-    const mySecret = getParticipantSecret();
-    const nullifier = persistentHash<Bytes<32>>(mySecret);
-
-    verifiedAllocationsCount = ((verifiedAllocationsCount + 1) as Uint<64>);
-    lastVerifiedAllocationHash = disclose(nullifier);
-    lastVerifiedTimestamp = disclose(currentTimestamp);
-    verificationResult = true;
-
-    return disclose(verificationResult);
+    ruleCommitments.insert(disclose(projectId), disclose(ruleHash));
 }
 
-// ─── CIRCUIT 5: Finalize Distribution (Organizer) ───────────────────────────
-// Closes the distribution once all participant proofs have been confirmed
-export circuit finalizeDistribution(
-    currentTimestamp: Uint<64>
-): Boolean {
-    assert(distributionStatus == 1, "Distribution pool must be active to finalize");
-    distributionStatus = 2; // Finalized
-    lastVerifiedTimestamp = disclose(currentTimestamp);
-    return true;
+// 3. Register a contributor's public key hash
+export circuit addContributor(projectId: Bytes<32>, contributorKeyHash: Bytes<32>): [] {
+    const caller = callerKey();
+    assert(projectOwners.member(disclose(projectId)), "Project not found");
+    assert(projectOwners.lookup(disclose(projectId)) == caller, "Only owner can add contributors");
+
+    const regKey = persistentHash<[Bytes<32>, Bytes<32>]>([projectId, contributorKeyHash]);
+    contributorRegistry.insert(disclose(regKey), disclose(true));
+}
+
+// 4. Allocate funds with ZK proof of rule compliance
+export circuit allocateFunds(projectId: Bytes<32>): [] {
+    const caller = callerKey();
+    assert(projectOwners.member(disclose(projectId)), "Project not found");
+    assert(projectOwners.lookup(disclose(projectId)) == caller, "Only owner can allocate");
+
+    const allocationPct = getAllocationPercentage();
+    const totalPct = getTotalPercentage();
+
+    assert(totalPct == 100, "Total allocation must equal 100%");
+    assert(allocationPct > 0, "Allocation percentage must be positive");
+
+    distributionStatus.insert(disclose(projectId), 1);
+}
+
+// 5. Verify a contributor's private allocation matches the rules
+export circuit verifyAllocation(projectId: Bytes<32>): [] {
+    const contributorKey = callerKey();
+    const regKey = persistentHash<[Bytes<32>, Bytes<32>]>([projectId, contributorKey]);
+
+    assert(contributorRegistry.member(disclose(regKey)), "Contributor not registered");
+    assert(contributorRegistry.lookup(disclose(regKey)) == true, "Contributor not registered");
+
+    const myAllocation = getAllocationAmount();
+    const poolAmount = getPoolAmount();
+    const myPercentage = getAllocationPercentage();
+
+    assert(myAllocation * 100 == poolAmount * myPercentage, "Allocation does not match agreed percentage");
+
+    allocationVerified.insert(disclose(regKey), disclose(true));
+    totalAllocationsVerified.increment(1);
+}
+
+// 6. Finalize distribution
+export circuit finalizeDistribution(projectId: Bytes<32>): [] {
+    const caller = callerKey();
+    assert(projectOwners.member(disclose(projectId)), "Project not found");
+    assert(projectOwners.lookup(disclose(projectId)) == caller, "Only owner can finalize");
+
+    distributionStatus.insert(disclose(projectId), 2);
+}
+
+// 7. Claim payment (contributor proves their allocation)
+export circuit claimPayment(projectId: Bytes<32>): [] {
+    const contributorKey = callerKey();
+    const regKey = persistentHash<[Bytes<32>, Bytes<32>]>([projectId, contributorKey]);
+
+    assert(allocationVerified.member(disclose(regKey)), "Allocation not yet verified");
+    assert(allocationVerified.lookup(disclose(regKey)) == true, "Allocation not yet verified");
+
+    assert(distributionStatus.member(disclose(projectId)), "Distribution not yet finalized");
+    assert(distributionStatus.lookup(disclose(projectId)) == 2, "Distribution not yet finalized");
+}
+
+// 8. Query project verification status
+export circuit getProjectStatus(projectId: Bytes<32>): Uint<64> {
+    assert(distributionStatus.member(disclose(projectId)), "Project not found");
+    return distributionStatus.lookup(disclose(projectId));
 }

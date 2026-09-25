@@ -59,8 +59,11 @@ if (!fs.existsSync(contractPath)) {
 const SplitShieldModule = await import(pathToFileURL(contractPath).href);
 
 const defaultWitnesses = {
-  getParticipantAllocation: (context: any): [any, bigint] => [context.privateState, 2500n],
-  getParticipantSecret: (context: any): [any, Uint8Array] => [context.privateState, new Uint8Array(32).fill(42)],
+  getPoolAmount: (context: any): [any, bigint] => [context.privateState, 10000n],
+  getAllocationAmount: (context: any): [any, bigint] => [context.privateState, 2500n],
+  getAllocationPercentage: (context: any): [any, bigint] => [context.privateState, 25n],
+  getTotalPercentage: (context: any): [any, bigint] => [context.privateState, 100n],
+  getBlindingFactor: (context: any): [any, Uint8Array] => [context.privateState, new Uint8Array(32).fill(42)],
 };
 
 const compiledContract = CompiledContract.make('splitshield', SplitShieldModule.Contract).pipe(
@@ -196,12 +199,16 @@ async function main() {
         if (now - lastLog > 3000 || s.isSynced) {
           lastLog = now;
           const uSynced = s.unshielded?.progress?.isStrictlyComplete?.() ?? false;
+          const uComplete = s.unshielded?.progress?.isCompleteWithin?.(100n) ?? uSynced;
           const sSynced = s.shielded?.state?.progress?.isStrictlyComplete?.() ?? false;
           const dSynced = s.dust?.state?.progress?.isStrictlyComplete?.() ?? false;
-          console.log(`\n  [Sync Status] Unshielded: ${uSynced} | Shielded: ${sSynced} | Dust: ${dSynced} | Overall Synced: ${s.isSynced}`);
+          const dComplete = s.dust?.state?.progress?.isCompleteWithin?.(100n) ?? dSynced;
+          console.log(`\n  [Sync Status] Unshielded: ${uSynced} (near: ${uComplete}) | Dust: ${dSynced} (near: ${dComplete}) | Overall Synced: ${s.isSynced}`);
           console.log(`  🪙 Current tNIGHT: ${tNight.toLocaleString()} | ⛽ DUST: ${dustBal.toLocaleString()}`);
         }
-        if (s.isSynced) {
+        const uReady = (s.unshielded?.progress?.isCompleteWithin?.(100n) ?? false) || (s.unshielded?.progress?.isStrictlyComplete?.() ?? false);
+        const dReady = (s.dust?.state?.progress?.isCompleteWithin?.(100n) ?? false) || (s.dust?.state?.progress?.isStrictlyComplete?.() ?? false);
+        if (s.isSynced || (tNight > 0n && dustBal > 0n && (uReady || dReady))) {
           clearInterval(syncInterval);
           sub.unsubscribe();
           resolve(s);

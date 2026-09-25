@@ -220,9 +220,8 @@ export function formatWalletBackupNotice(wallet: WalletCredentials, network: Net
 }
 
 export function recordDeployment(network: NetworkId, address: string, deployer: string, opts: FsOptions = {}): void {
-  const cwd = opts.cwd ?? process.cwd();
-  const existing = loadState({ cwd });
-  const next: NetworkState = existing ?? {
+  const rootExisting = loadState({ cwd: ROOT_DIR });
+  const next: NetworkState = rootExisting ?? {
     version: STATE_VERSION,
     activeNetwork: network,
     wallets: {},
@@ -232,5 +231,11 @@ export function recordDeployment(network: NetworkId, address: string, deployer: 
     ...next.deployments,
     [network]: { address, deployer, deployedAt: new Date().toISOString() },
   };
-  saveState(next, { cwd });
+  saveState(next, { cwd: ROOT_DIR });
+
+  const cwd = opts.cwd ?? process.cwd();
+  if (path.resolve(cwd) !== path.resolve(ROOT_DIR)) {
+    saveState(next, { cwd });
+  }
 }
+
