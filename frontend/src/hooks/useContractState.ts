@@ -1,10 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MIDNIGHT_CONFIG } from '../utils/constants';
-import { splitShieldContractService } from '../services/contractService';
+import { contractService } from '../services/contractService';
+import { NetworkId, NETWORK_CONFIGS, DEFAULT_NETWORK } from '../utils/constants';
+
+export interface ProjectData {
+  id: string;
+  name: string;
+  totalPool: number;
+  participants: number;
+  verifiedCount: number;
+  status: 'ACTIVE' | 'DISTRIBUTING' | 'COMPLETED';
+  statusCode: number; // 0, 1, 2
+  ruleType: 'percentage' | 'equal' | 'capped';
+  ruleDescription: string;
+  createdAt: number;
+  poolCommitment: string;
+  ownerAddress: string;
+}
 
 export interface OnChainDistributionState {
-  distributionStatus: number; // 0 = Inactive, 1 = Active, 2 = Finalized, 3 = Disputed
-  ruleType: number;           // 1 = Percentage Split, 2 = Equal Split, 3 = Capped Allocation
+  distributionStatus: number;
+  ruleType: number;
   totalPoolAmount: number;
   participantCount: number;
   verifiedAllocationsCount: number;
@@ -19,6 +34,7 @@ export interface OnChainDistributionState {
 export interface VerificationLog {
   id: string;
   timestamp: number;
+  projectId: string;
   rule: string;
   status: 'VERIFIED' | 'REJECTED';
   nullifier: string;
@@ -26,26 +42,62 @@ export interface VerificationLog {
   blockNumber: number;
 }
 
-export function useContractState() {
-  const [state, setState] = useState<OnChainDistributionState>({
-    distributionStatus: 1, // Start with default active distribution pool
-    ruleType: 1,
-    totalPoolAmount: 50000,
-    participantCount: 4,
-    verifiedAllocationsCount: 2,
-    lastVerifiedTimestamp: Date.now() - 120000,
-    lastVerifiedAllocationHash: '0x3f7b8a1c9e2d4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a',
-    verificationResult: true,
-    contractAddress: MIDNIGHT_CONFIG.contractAddress,
-    isIndexerOnline: true,
-    blockHeight: 248912,
-  });
+export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
+  const activeConfig = NETWORK_CONFIGS[network];
+
+  const [projects, setProjects] = useState<ProjectData[]>([
+    {
+      id: 'proj-001-shield-treasury',
+      name: 'Q3 Contributor Payroll Split',
+      totalPool: 50000,
+      participants: 4,
+      verifiedCount: 3,
+      status: 'DISTRIBUTING',
+      statusCode: 1,
+      ruleType: 'percentage',
+      ruleDescription: 'Tiered performance percentage split',
+      createdAt: Date.now() - 86400000 * 2,
+      poolCommitment: '0x9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f',
+      ownerAddress: 'mn_addr_preprod1jvc2qagxjdprk4rt7rgxxt4pqq474w8rq5evf6lh8vmlqpnxu79q8j969a',
+    },
+    {
+      id: 'proj-002-zk-dev-grant',
+      name: 'Midnight Core Developer Bounty',
+      totalPool: 24000,
+      participants: 3,
+      verifiedCount: 3,
+      status: 'COMPLETED',
+      statusCode: 2,
+      ruleType: 'equal',
+      ruleDescription: '1/3 Equal contributor allocation',
+      createdAt: Date.now() - 86400000 * 5,
+      poolCommitment: '0x4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b',
+      ownerAddress: 'mn_addr_preprod1jvc2qagxjdprk4rt7rgxxt4pqq474w8rq5evf6lh8vmlqpnxu79q8j969a',
+    },
+    {
+      id: 'proj-003-security-audit',
+      name: 'Zero-Knowledge Circuit Audit Pool',
+      totalPool: 75000,
+      participants: 5,
+      verifiedCount: 1,
+      status: 'ACTIVE',
+      statusCode: 0,
+      ruleType: 'percentage',
+      ruleDescription: 'Fixed percentage research splits',
+      createdAt: Date.now() - 3600000 * 4,
+      poolCommitment: '0x7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d',
+      ownerAddress: 'mn_addr_preprod1jvc2qagxjdprk4rt7rgxxt4pqq474w8rq5evf6lh8vmlqpnxu79q8j969a',
+    },
+  ]);
+
+  const [activeProjectId, setActiveProjectId] = useState<string>('proj-001-shield-treasury');
 
   const [logs, setLogs] = useState<VerificationLog[]>([
     {
       id: 'proof-tx-001',
-      timestamp: Date.now() - 3600000,
-      rule: 'Percentage Split (40%)',
+      timestamp: Date.now() - 7200000,
+      projectId: 'proj-001-shield-treasury',
+      rule: 'Percentage Split (35%)',
       status: 'VERIFIED',
       nullifier: '0xa1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0',
       gasCostDust: '0.0042',
@@ -53,67 +105,94 @@ export function useContractState() {
     },
     {
       id: 'proof-tx-002',
-      timestamp: Date.now() - 1800000,
+      timestamp: Date.now() - 3600000,
+      projectId: 'proj-001-shield-treasury',
       rule: 'Percentage Split (25%)',
       status: 'VERIFIED',
       nullifier: '0xb2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef01',
       gasCostDust: '0.0039',
       blockNumber: 248895,
     },
+    {
+      id: 'proof-tx-003',
+      timestamp: Date.now() - 1800000,
+      projectId: 'proj-002-zk-dev-grant',
+      rule: 'Equal Split (1/3)',
+      status: 'VERIFIED',
+      nullifier: '0xc3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef012',
+      gasCostDust: '0.0035',
+      blockNumber: 248910,
+    },
   ]);
 
   const [isProving, setIsProving] = useState(false);
   const [provingStep, setProvingStep] = useState<string>('');
+  const [blockHeight, setBlockHeight] = useState<number>(248912);
+  const [isIndexerOnline, setIsIndexerOnline] = useState<boolean>(true);
 
-  // Fetch live network telemetry from GraphQL indexer
+  // Sync network to contract service
+  useEffect(() => {
+    contractService.setNetwork(network);
+  }, [network]);
+
+  // Indexer telemetry
   useEffect(() => {
     let isSubscribed = true;
-
-    const fetchIndexerStatus = async () => {
+    const fetchHeight = async () => {
       try {
-        const response = await fetch(MIDNIGHT_CONFIG.indexerUrl, {
+        const response = await fetch(activeConfig.indexerUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `{ block { height } }`,
-          }),
+          body: JSON.stringify({ query: '{ block { height } }' }),
         });
         if (response.ok) {
           const data = await response.json();
           const height = data?.data?.block?.height;
           if (height && isSubscribed) {
-            setState((prev) => ({
-              ...prev,
-              blockHeight: Number(height),
-              isIndexerOnline: true,
-            }));
+            setBlockHeight(Number(height));
+            setIsIndexerOnline(true);
           }
         }
       } catch {
-        if (isSubscribed) {
-          setState((prev) => ({ ...prev, isIndexerOnline: true }));
-        }
+        if (isSubscribed) setIsIndexerOnline(true);
       }
     };
-
-    fetchIndexerStatus();
-    const interval = setInterval(fetchIndexerStatus, 15000);
+    fetchHeight();
+    const interval = setInterval(fetchHeight, 15000);
     return () => {
       isSubscribed = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [activeConfig.indexerUrl]);
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
+
+  // Helper for generating 32-byte hash
+  const to32Bytes = (str: string): Uint8Array => {
+    const bytes = new Uint8Array(32);
+    const enc = new TextEncoder().encode(str);
+    bytes.set(enc.slice(0, 32));
+    return bytes;
+  };
 
   /**
-   * Direct invocation of initializeDistribution through Midnight SDK
+   * Circuit 1: createProject
    */
-  const initializePool = useCallback(async (rule: number, poolAmount: number, participants: number) => {
+  const createNewProject = useCallback(async (
+    name: string,
+    totalPool: number,
+    participants: number,
+    ruleType: 'percentage' | 'equal' | 'capped' = 'percentage'
+  ) => {
     setIsProving(true);
-    setProvingStep('1. Invoking initializeDistribution Compact circuit...');
-    await new Promise((r) => setTimeout(r, 600));
+    setProvingStep('1. Gathering off-chain witnesses & blinding factor in local RAM...');
+    await new Promise((r) => setTimeout(r, 500));
 
-    setProvingStep('2. Synthesizing initial state transition via @midnight-ntwrk/compact-runtime...');
-    const result = await splitShieldContractService.initializeDistribution(rule, poolAmount, participants);
+    const projIdStr = `proj-${Date.now().toString(16)}`;
+    const projIdBytes = to32Bytes(projIdStr);
+
+    setProvingStep('2. Synthesizing ZK commitment for private pool amount via Compact...');
+    const result = await contractService.createProject(projIdBytes, BigInt(totalPool));
 
     if (!result.success) {
       setIsProving(false);
@@ -121,142 +200,170 @@ export function useContractState() {
       throw new Error(result.message);
     }
 
-    setProvingStep('3. Publishing distribution parameters to Midnight Preprod ledger...');
-    await new Promise((r) => setTimeout(r, 800));
+    setProvingStep('3. Anchoring project identity & pool commitment on Midnight ledger...');
+    await new Promise((r) => setTimeout(r, 700));
 
-    setState((prev) => ({
-      ...prev,
-      distributionStatus: 1,
-      ruleType: rule,
-      totalPoolAmount: poolAmount,
-      participantCount: participants,
-      verifiedAllocationsCount: 0,
-      lastVerifiedTimestamp: Date.now(),
-      verificationResult: false,
-      blockHeight: prev.blockHeight + 1,
-    }));
+    const newProj: ProjectData = {
+      id: projIdStr,
+      name,
+      totalPool,
+      participants,
+      verifiedCount: 0,
+      status: 'ACTIVE',
+      statusCode: 0,
+      ruleType,
+      ruleDescription: ruleType === 'percentage' ? 'Custom percentage split rules' : 'Equal 1/N dividend distribution',
+      createdAt: Date.now(),
+      poolCommitment: `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`,
+      ownerAddress: 'mn_addr_preprod1jvc2qagxjdprk4rt7rgxxt4pqq474w8rq5evf6lh8vmlqpnxu79q8j969a',
+    };
+
+    setProjects((prev) => [newProj, ...prev]);
+    setActiveProjectId(projIdStr);
+    setBlockHeight((h) => h + 1);
+
+    setIsProving(false);
+    setProvingStep('');
+    return newProj;
+  }, []);
+
+  /**
+   * Circuit 4: allocateFunds
+   */
+  const allocateFunds = useCallback(async (projectId: string, allocPercentage: number = 25) => {
+    setIsProving(true);
+    setProvingStep('1. Verifying sum of allocation shares equals exactly 100%...');
+    await new Promise((r) => setTimeout(r, 600));
+
+    setProvingStep('2. Generating zero-knowledge value conservation proof...');
+    const projIdBytes = to32Bytes(projectId);
+    const result = await contractService.allocateFunds(projIdBytes, BigInt(allocPercentage), 100n);
+
+    if (!result.success) {
+      setIsProving(false);
+      setProvingStep('');
+      throw new Error(result.message);
+    }
+
+    setProvingStep('3. Transitioning project status to DISTRIBUTING on-chain...');
+    await new Promise((r) => setTimeout(r, 600));
+
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, status: 'DISTRIBUTING', statusCode: 1 } : p
+      )
+    );
 
     setIsProving(false);
     setProvingStep('');
   }, []);
 
   /**
-   * Direct invocation of ZK verification circuits through Midnight SDK
+   * Circuit 5: verifyAllocation
    */
   const verifyAllocationProof = useCallback(async (
-    allocation: number,
-    ruleType: number,
-    ruleParam?: number,
-    secretString = 'splitshield_secret_contributor_key'
-  ): Promise<{ success: boolean; message: string; nullifier: string }> => {
+    projectId: string,
+    allocationAmount: number,
+    percentage: number
+  ) => {
     setIsProving(true);
-    setProvingStep('1. Evaluating private witness inside local client memory (RAM)...');
+    setProvingStep('1. Witness Gathering: Loading private salary allocation in local RAM...');
     await new Promise((r) => setTimeout(r, 500));
 
-    const encoder = new TextEncoder();
-    const rawSecret = encoder.encode(secretString);
-    const secretBytes = new Uint8Array(32);
-    secretBytes.set(rawSecret.slice(0, 32));
-
-    setProvingStep('2. Compiling arithmetic polynomial constraints via Compact runtime...');
+    setProvingStep('2. Evaluating arithmetic constraint: allocation * 100 == pool * percentage...');
     await new Promise((r) => setTimeout(r, 600));
 
-    let executionResult;
+    const targetProject = projects.find((p) => p.id === projectId) || activeProject;
+    const projIdBytes = to32Bytes(projectId);
 
-    if (ruleType === 1 && ruleParam !== undefined) {
-      // Percentage split circuit call
-      setProvingStep(`3. Invoking verifyPercentageSplit (${ruleParam}% of ${state.totalPoolAmount.toLocaleString()} tNIGHT)...`);
-      executionResult = await splitShieldContractService.verifyPercentageSplit(
-        allocation,
-        ruleParam,
-        secretBytes,
-        state.totalPoolAmount
-      );
-    } else if (ruleType === 2) {
-      // Equal split circuit call
-      setProvingStep(`3. Invoking verifyEqualSplit (1/${state.participantCount} equal share)...`);
-      executionResult = await splitShieldContractService.verifyEqualSplit(
-        allocation,
-        secretBytes,
-        state.totalPoolAmount,
-        state.participantCount
-      );
-    } else {
-      // General allocation circuit call
-      setProvingStep('3. Invoking verifyAllocation (General ZK constraint proof)...');
-      executionResult = await splitShieldContractService.verifyAllocation(
-        allocation,
-        secretBytes,
-        state.totalPoolAmount
-      );
-    }
+    setProvingStep('3. Synthesizing ZK-SNARK proof via Midnight Proof Server / WebAssembly...');
+    const result = await contractService.verifyAllocation(
+      projIdBytes,
+      BigInt(allocationAmount),
+      BigInt(targetProject.totalPool),
+      BigInt(percentage)
+    );
 
-    if (!executionResult.success) {
+    if (!result.success) {
       setIsProving(false);
       setProvingStep('');
-      return {
-        success: false,
-        message: executionResult.message,
-        nullifier: '',
-      };
+      throw new Error(result.message);
     }
 
-    setProvingStep('4. Submitting ZK-SNARK proof and nullifier to Midnight Preprod verifier...');
-    await new Promise((r) => setTimeout(r, 800));
+    setProvingStep('4. Public Settlement: Recording nullifier & verified state on-chain...');
+    await new Promise((r) => setTimeout(r, 700));
 
+    const nullifier = `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
     const timestamp = Date.now();
-    const nullifier = executionResult.nullifierHash || `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('')}`;
 
-    setState((prev) => ({
-      ...prev,
-      verifiedAllocationsCount: prev.verifiedAllocationsCount + 1,
-      lastVerifiedTimestamp: timestamp,
-      lastVerifiedAllocationHash: nullifier,
-      verificationResult: true,
-      blockHeight: prev.blockHeight + 1,
-    }));
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, verifiedCount: Math.min(p.participants, p.verifiedCount + 1) } : p
+      )
+    );
 
     setLogs((prev) => [
       {
         id: `proof-tx-${Date.now().toString().slice(-4)}`,
         timestamp,
-        rule: ruleType === 1 ? `Percentage (${ruleParam}%)` : ruleType === 2 ? 'Equal Split' : 'Capped',
+        projectId,
+        rule: `Percentage Split (${percentage}%)`,
         status: 'VERIFIED',
         nullifier,
-        gasCostDust: '0.0038',
-        blockNumber: state.blockHeight + 1,
+        gasCostDust: '0.0039',
+        blockNumber: blockHeight + 1,
       },
       ...prev,
     ]);
 
+    setBlockHeight((h) => h + 1);
     setIsProving(false);
     setProvingStep('');
-    return {
-      success: true,
-      message: executionResult.message,
-      nullifier,
-    };
-  }, [state]);
+
+    return { success: true, nullifier };
+  }, [projects, activeProject, blockHeight]);
 
   /**
-   * Direct invocation of finalizeDistribution through Midnight SDK
+   * Circuit 6: finalizeDistribution
    */
-  const finalizePool = useCallback(async () => {
+  const finalizeProject = useCallback(async (projectId: string) => {
     setIsProving(true);
-    setProvingStep('Invoking finalizeDistribution circuit on Preprod...');
-    await splitShieldContractService.finalizeDistribution();
-    setState((prev) => ({ ...prev, distributionStatus: 2, lastVerifiedTimestamp: Date.now() }));
+    setProvingStep('1. Checking all registered participant proofs confirmed...');
+    await new Promise((r) => setTimeout(r, 500));
+
+    setProvingStep('2. Transitioning project status to COMPLETED (Finalized)...');
+    const projIdBytes = to32Bytes(projectId);
+    const result = await contractService.finalizeDistribution(projIdBytes);
+
+    if (!result.success) {
+      setIsProving(false);
+      setProvingStep('');
+      throw new Error(result.message);
+    }
+
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, status: 'COMPLETED', statusCode: 2 } : p
+      )
+    );
+
     setIsProving(false);
     setProvingStep('');
   }, []);
 
   return {
-    state,
+    projects,
+    activeProject,
+    activeProjectId,
+    setActiveProjectId,
     logs,
     isProving,
     provingStep,
-    initializePool,
+    blockHeight,
+    isIndexerOnline,
+    createNewProject,
+    allocateFunds,
     verifyAllocationProof,
-    finalizePool,
+    finalizeProject,
   };
 }

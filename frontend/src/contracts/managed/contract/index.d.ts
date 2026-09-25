@@ -1,73 +1,125 @@
 import type * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
 
 export type Witnesses<PS> = {
-  getParticipantAllocation(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
-  getParticipantSecret(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
+  getPoolAmount(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
+  getAllocationAmount(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
+  getAllocationPercentage(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
+  getTotalPercentage(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, bigint];
+  getBlindingFactor(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
 }
 
 export type ImpureCircuits<PS> = {
-  initializeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                         rule_0: bigint,
-                         totalPool_0: bigint,
-                         numParticipants_0: bigint,
-                         currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  createProject(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  defineRules(context: __compactRuntime.CircuitContext<PS>,
+              projectId_0: Uint8Array,
+              ruleHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  addContributor(context: __compactRuntime.CircuitContext<PS>,
+                 projectId_0: Uint8Array,
+                 contributorKeyHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  allocateFunds(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   verifyAllocation(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyPercentageSplit(context: __compactRuntime.CircuitContext<PS>,
-                        percentage_0: bigint,
-                        currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyEqualSplit(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   finalizeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                       currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                       projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claimPayment(context: __compactRuntime.CircuitContext<PS>,
+               projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  getProjectStatus(context: __compactRuntime.CircuitContext<PS>,
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, bigint>;
 }
 
 export type ProvableCircuits<PS> = {
-  initializeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                         rule_0: bigint,
-                         totalPool_0: bigint,
-                         numParticipants_0: bigint,
-                         currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  createProject(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  defineRules(context: __compactRuntime.CircuitContext<PS>,
+              projectId_0: Uint8Array,
+              ruleHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  addContributor(context: __compactRuntime.CircuitContext<PS>,
+                 projectId_0: Uint8Array,
+                 contributorKeyHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  allocateFunds(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   verifyAllocation(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyPercentageSplit(context: __compactRuntime.CircuitContext<PS>,
-                        percentage_0: bigint,
-                        currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyEqualSplit(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   finalizeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                       currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                       projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claimPayment(context: __compactRuntime.CircuitContext<PS>,
+               projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  getProjectStatus(context: __compactRuntime.CircuitContext<PS>,
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, bigint>;
 }
 
 export type PureCircuits = {
 }
 
 export type Circuits<PS> = {
-  initializeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                         rule_0: bigint,
-                         totalPool_0: bigint,
-                         numParticipants_0: bigint,
-                         currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  createProject(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  defineRules(context: __compactRuntime.CircuitContext<PS>,
+              projectId_0: Uint8Array,
+              ruleHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  addContributor(context: __compactRuntime.CircuitContext<PS>,
+                 projectId_0: Uint8Array,
+                 contributorKeyHash_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  allocateFunds(context: __compactRuntime.CircuitContext<PS>,
+                projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   verifyAllocation(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyPercentageSplit(context: __compactRuntime.CircuitContext<PS>,
-                        percentage_0: bigint,
-                        currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
-  verifyEqualSplit(context: __compactRuntime.CircuitContext<PS>,
-                   currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   finalizeDistribution(context: __compactRuntime.CircuitContext<PS>,
-                       currentTimestamp_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+                       projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  claimPayment(context: __compactRuntime.CircuitContext<PS>,
+               projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  getProjectStatus(context: __compactRuntime.CircuitContext<PS>,
+                   projectId_0: Uint8Array): __compactRuntime.CircuitResults<PS, bigint>;
 }
 
 export type Ledger = {
-  readonly distributionStatus: bigint;
-  readonly ruleType: bigint;
-  readonly totalPoolAmount: bigint;
-  readonly participantCount: bigint;
-  readonly verifiedAllocationsCount: bigint;
-  readonly lastVerifiedTimestamp: bigint;
-  readonly lastVerifiedAllocationHash: Uint8Array;
-  readonly verificationResult: boolean;
+  readonly projectCount: bigint;
+  readonly totalProjectsCreated: bigint;
+  readonly totalAllocationsVerified: bigint;
+  projectOwners: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): Uint8Array;
+    [Symbol.iterator](): Iterator<[Uint8Array, Uint8Array]>
+  };
+  poolCommitments: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): Uint8Array;
+    [Symbol.iterator](): Iterator<[Uint8Array, Uint8Array]>
+  };
+  ruleCommitments: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): Uint8Array;
+    [Symbol.iterator](): Iterator<[Uint8Array, Uint8Array]>
+  };
+  contributorRegistry: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): boolean;
+    [Symbol.iterator](): Iterator<[Uint8Array, boolean]>
+  };
+  allocationVerified: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): boolean;
+    [Symbol.iterator](): Iterator<[Uint8Array, boolean]>
+  };
+  distributionStatus: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): bigint;
+    [Symbol.iterator](): Iterator<[Uint8Array, bigint]>
+  };
 }
 
 export type ContractReferenceLocations = any;

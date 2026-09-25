@@ -4,41 +4,93 @@
   "runtime-version": "0.16.0",
   "circuits": [
     {
-      "name": "initializeDistribution",
+      "name": "createProject",
       "pure": false,
       "proof": true,
       "arguments": [
         {
-          "name": "rule",
+          "name": "projectId",
           "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        },
-        {
-          "name": "totalPool",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        },
-        {
-          "name": "numParticipants",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        },
-        {
-          "name": "currentTimestamp",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
+            "type-name": "Bytes",
+            "length": 32
           }
         }
       ],
       "result-type": {
-        "type-name": "Boolean"
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "defineRules",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "projectId",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "ruleHash",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "addContributor",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "projectId",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "contributorKeyHash",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "allocateFunds",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "projectId",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
       }
     },
     {
@@ -47,56 +99,17 @@
       "proof": true,
       "arguments": [
         {
-          "name": "currentTimestamp",
+          "name": "projectId",
           "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
+            "type-name": "Bytes",
+            "length": 32
           }
         }
       ],
       "result-type": {
-        "type-name": "Boolean"
-      }
-    },
-    {
-      "name": "verifyPercentageSplit",
-      "pure": false,
-      "proof": true,
-      "arguments": [
-        {
-          "name": "percentage",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        },
-        {
-          "name": "currentTimestamp",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Boolean"
-      }
-    },
-    {
-      "name": "verifyEqualSplit",
-      "pure": false,
-      "proof": true,
-      "arguments": [
-        {
-          "name": "currentTimestamp",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Boolean"
+        "type-name": "Tuple",
+        "types": [
+        ]
       }
     },
     {
@@ -105,21 +118,60 @@
       "proof": true,
       "arguments": [
         {
-          "name": "currentTimestamp",
+          "name": "projectId",
           "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
+            "type-name": "Bytes",
+            "length": 32
           }
         }
       ],
       "result-type": {
-        "type-name": "Boolean"
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "claimPayment",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "projectId",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "getProjectStatus",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "projectId",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
       }
     }
   ],
   "witnesses": [
     {
-      "name": "getParticipantAllocation",
+      "name": "getPoolAmount",
       "arguments": [
       ],
       "result type": {
@@ -128,7 +180,34 @@
       }
     },
     {
-      "name": "getParticipantSecret",
+      "name": "getAllocationAmount",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getAllocationPercentage",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getTotalPercentage",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getBlindingFactor",
       "arguments": [
       ],
       "result type": {
@@ -141,82 +220,103 @@
   ],
   "ledger": [
     {
-      "name": "distributionStatus",
+      "name": "projectCount",
       "index": 0,
       "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
+      "storage": "Counter"
     },
     {
-      "name": "ruleType",
+      "name": "totalProjectsCreated",
       "index": 1,
       "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
+      "storage": "Counter"
     },
     {
-      "name": "totalPoolAmount",
+      "name": "totalAllocationsVerified",
       "index": 2,
       "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
+      "storage": "Counter"
     },
     {
-      "name": "participantCount",
+      "name": "projectOwners",
       "index": 3,
       "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
-    },
-    {
-      "name": "verifiedAllocationsCount",
-      "index": 4,
-      "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
-    },
-    {
-      "name": "lastVerifiedTimestamp",
-      "index": 5,
-      "exported": true,
-      "storage": "Cell",
-      "type": {
-        "type-name": "Uint",
-        "maxval": 18446744073709551615
-      }
-    },
-    {
-      "name": "lastVerifiedAllocationHash",
-      "index": 6,
-      "exported": true,
-      "storage": "Cell",
-      "type": {
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
         "type-name": "Bytes",
         "length": 32
       }
     },
     {
-      "name": "verificationResult",
+      "name": "poolCommitments",
+      "index": 4,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "ruleCommitments",
+      "index": 5,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "contributorRegistry",
+      "index": 6,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "allocationVerified",
       "index": 7,
       "exported": true,
-      "storage": "Cell",
-      "type": {
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
         "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "distributionStatus",
+      "index": 8,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
       }
     }
   ]
