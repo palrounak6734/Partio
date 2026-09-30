@@ -3,6 +3,7 @@
   <h1>Partio</h1>
   <p><strong>Allocate fairly. Pay privately. Prove everything.</strong></p>
   <p>A confidential allocation and payment-control protocol that proves funds were distributed according to approved rules without publicly exposing individual compensation. Built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
+  <p><em>Partio — Confidential Contributor Partitioning on Midnight Network. Built and maintained by <a href="https://github.com/palrounak6734">@palrounak6734</a>.</em></p>
 
   [![CI/CD Pipeline](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml/badge.svg)](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml)
   [![Network](https://img.shields.io/badge/Midnight-Preprod%20%26%20Preview-10b981)](https://midnightexplorer.com)
