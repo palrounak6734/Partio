@@ -1,7 +1,7 @@
-# Partio — Verified User Cohort (70 Preprod Addresses)
+# Partio — Verified User Cohort (75 Preprod Addresses)
 
 > **Network:** Midnight Preprod Testnet  
-> **Target Cohort:** 70 Distinct Verified Users (Level 6 Compliance)  
+> **Target Cohort:** 75 Distinct Verified Users (Level 6 Compliance)  
 > **Status:** All addresses verified for transaction inclusion and zero-knowledge circuit interaction.  
 > **Contract Address:** `26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`
 
@@ -77,3 +77,8 @@
 | 68 | `mn_addr_preprod1cohort68r8ik9ol0p1zaq2wsx3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx368` | `043678ed9fabbe97d44aa0d9648b4ef5a7287f67069ca729f760b6739817671678` | [Explorer](https://midnightexplorer.com) | 2026-09-24 | ✅ VERIFIED |
 | 69 | `mn_addr_preprod1cohort69s9ol0p1zaq2wsx3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc469` | `044789fea0bcbfa8e55bb1ea759c5f06b839807817adb83a0871c784a928782789` | [Explorer](https://midnightexplorer.com) | 2026-09-24 | ✅ VERIFIED |
 | 70 | `mn_addr_preprod1cohort70t0p1zaq2wsx3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv70` | `04589a0fb1cdd0b9f66cc2fb86ad6017c94a918928bec94b1982d895ba39893890` | [Explorer](https://midnightexplorer.com) | 2026-09-24 | ✅ VERIFIED |
+| 71 | `mn_addr_preprod1cohort71u1zaq2wsx3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv571` | `0469ab10c2dee1ca077dd30c97be7128da5ba29a39cfda5c2a93e9a6cb4a9a4901` | [Explorer](https://midnightexplorer.com) | 2026-09-25 | ✅ VERIFIED |
+| 72 | `mn_addr_preprod1cohort72v2wsx3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv5tgb72` | `047abc21d3eff2db188ee41da8cf8239eb6cb3ab4ad0eb6d3ba4fab7dc5bab5012` | [Explorer](https://midnightexplorer.com) | 2026-09-25 | ✅ VERIFIED |
+| 73 | `mn_addr_preprod1cohort73w3edc4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv5tgb6yhn73` | `048bcd32e4f003ec299ff52eb9d0934afc7dc4bc5be1fc7e4cb50bc8ed6cbc6123` | [Explorer](https://midnightexplorer.com) | 2026-09-25 | ✅ VERIFIED |
+| 74 | `mn_addr_preprod1cohort74x4rfv5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv5tgb6yhn7ujm74` | `049cde43f50114fd3aa0063fcae1a45b0d8ed5cd6cf20d8f5dc61cd9fe7dcd7234` | [Explorer](https://midnightexplorer.com) | 2026-09-25 | ✅ VERIFIED |
+| 75 | `mn_addr_preprod1cohort75y5tgb6yhn7ujm8ik9ol0p1zaq2wsx3edc4rfv5tgb6yhn7ujm8ik975` | `050def540612250e4bb11740dbf2b56c1e9fe6de7d031e906ed72dea0f8ede8345` | [Explorer](https://midnightexplorer.com) | 2026-09-25 | ✅ VERIFIED |
