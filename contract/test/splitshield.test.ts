@@ -275,4 +275,40 @@ describe('SplitShield Multi-Project Zero-Knowledge Smart Contract & Circuits', (
       }).toThrow('Distribution not yet finalized');
     });
   });
+
+  describe('Circuit 8: getProjectStatus & Lifecycle Queries', () => {
+    it('returns exact lifecycle states (0=ACTIVE, 1=DISTRIBUTING, 2=COMPLETED)', () => {
+      const contract = getBaseContract();
+      const ctx1 = createTestContext(contract, ownerPublicKey);
+      const res1 = contract.impureCircuits.createProject(ctx1, testProjectId);
+
+      // Status after creation: 0 (ACTIVE)
+      const ctxAfterCreate = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const resStatus0 = contract.impureCircuits.getProjectStatus(ctxAfterCreate, testProjectId);
+      expect(resStatus0.result).toBe(0n);
+
+      // Status after allocate: 1 (DISTRIBUTING)
+      const ctx2 = createTestContext(contract, ownerPublicKey, res1.context.currentQueryContext.state);
+      const res2 = contract.impureCircuits.allocateFunds(ctx2, testProjectId);
+      const ctxDist = createTestContext(contract, ownerPublicKey, res2.context.currentQueryContext.state);
+      const resStatus1 = contract.impureCircuits.getProjectStatus(ctxDist, testProjectId);
+      expect(resStatus1.result).toBe(1n);
+
+      // Status after finalize: 2 (COMPLETED)
+      const res3 = contract.impureCircuits.finalizeDistribution(ctxDist, testProjectId);
+      const ctxDone = createTestContext(contract, ownerPublicKey, res3.context.currentQueryContext.state);
+      const resStatus2 = contract.impureCircuits.getProjectStatus(ctxDone, testProjectId);
+      expect(resStatus2.result).toBe(2n);
+    });
+
+    it('reverts getProjectStatus query when project does not exist', () => {
+      const contract = getBaseContract();
+      const ctx = createTestContext(contract, ownerPublicKey);
+      const nonExistentProject = new Uint8Array(32).fill(99);
+
+      expect(() => {
+        contract.impureCircuits.getProjectStatus(ctx, nonExistentProject);
+      }).toThrow('Project not found');
+    });
+  });
 });
