@@ -40,14 +40,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             className="lg:col-span-6 space-y-6"
           >
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-              Prove the Partition is Correct Without Publishing{' '}
+              Allocate fairly. Pay privately.{' '}
               <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">
-                Everyone's Payout.
+                Prove everything.
               </span>
             </h1>
 
             <p className="text-sm sm:text-base text-slate-200 leading-relaxed max-w-xl font-normal">
-              Partio enables DAOs, distributed teams, and grant pools to verify fair allocation mathematics using zero-knowledge circuits on Midnight. Contributors prove compliance with distribution rules while individual compensation remains 100% confidential.
+              Partio lets organizations distribute compensation and shared funds according to verifiable rules without exposing everyone's private payment details. Powered by zero-knowledge circuits on Midnight.
             </p>
 
             {/* CTAs with Smooth Hover Elevation */}

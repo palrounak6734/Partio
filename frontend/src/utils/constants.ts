@@ -76,7 +76,7 @@ export const DISTRIBUTION_RULES: DistributionRule[] = [
 
 export const APP_CONFIG = {
   appName: 'Partio',
-  tagline: 'Private Financial Operations & Payment Partitioning on Midnight',
+  tagline: 'Allocate fairly. Pay privately. Prove everything.',
   proofServerUrl: 'http://127.0.0.1:6300',
   maxCircuits: 10,
 };

@@ -2,8 +2,8 @@
 
 <div align="center">
   <br />
-  <p><strong>Prove the partition is mathematically sound without disclosing individual payouts.</strong></p>
-  <p>A production-grade, zero-knowledge contributor allocation and partitioning application built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
+  <p><strong>Allocate fairly. Pay privately. Prove everything.</strong></p>
+  <p>A confidential allocation and payment-control protocol that proves funds were distributed according to approved rules without publicly exposing individual compensation. Built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
 
   [![CI/CD Pipeline](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml/badge.svg)](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml)
   [![Network](https://img.shields.io/badge/Midnight-Preprod%20%26%20Preview-10b981)](https://midnightexplorer.com)
@@ -29,7 +29,23 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 2. Verified On-Chain Deployment
+## 2. Institutional Documentation Suite (Level 6 Benchmark)
+
+| Document | Purpose | Key Content |
+| :--- | :--- | :--- |
+| 📑 [**`PROPOSAL.md`**](PROPOSAL.md) | **Master Product, Business & Technical Plan** | Complete 141-point vision, dual-sided value proposition, institutional monetization model, and competitor differentiation |
+| 🏗️ [**`docs/architecture.md`**](docs/architecture.md) | **Multi-Tier Topology & Client Enclave** | Direct Midnight SDK integration, browser isolation, circuit invocation pipeline, and sequence diagrams |
+| 🛡️ [**`docs/privacy-model.md`**](docs/privacy-model.md) | **Formal Privacy Model & Invariants** | Strict witness vs. public ledger boundary, zero-knowledge mathematical invariants, and selective disclosure design |
+| 🔒 [**`docs/security.md`**](docs/security.md) | **Security Architecture & Audit Matrix** | Threat matrix, single-use nullifier replay protection, formal circuit assertion proofs, and access control model |
+| 📜 [**`docs/ALLOCATION_CERTIFICATE.md`**](docs/ALLOCATION_CERTIFICATE.md) | **Allocation Certificate Specification** | Cryptographic audit artifacts, schema, verification algorithms, and privacy-preserving compliance |
+| 📘 [**`docs/USAGE.md`**](docs/USAGE.md) | **Role-Based User Guide** | Step-by-step walkthroughs for Organization Admins, Allocation Managers, Contributors, and Auditors |
+| ⚡ [**`docs/CIRCUITS.md`**](docs/CIRCUITS.md) | **Zero-Knowledge Circuit Reference** | Mathematical constraint specifications, private inputs, and CIP-30 wallet approval mechanics |
+| 🎨 [**`docs/brand-brief.md`**](docs/brand-brief.md) | **Brand & Visual Identity System** | Typography, institutional color tokens (obsidian, titanium, emerald), and 60fps motion guidelines |
+| 🐦 [**`docs/X-Profile.md`**](docs/X-Profile.md) | **Official Product X Profile & Threads** | Profile configuration (@PartioZK) and 4 complete launch tweet threads for community engagement |
+
+---
+
+## 3. Verified On-Chain Deployment
 
 | Parameter | Preprod Network Configuration | Preview Network Configuration |
 | :--- | :--- | :--- |
@@ -44,7 +60,7 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 3. System Architecture & Direct Midnight SDK Integration
+## 4. System Architecture & Direct Midnight SDK Integration
 
 Partio enforces strict segregation between off-chain private computation and on-chain public settlement. The frontend directly invokes Midnight SDK methods via `@midnight-ntwrk/midnight-js-contracts` and `@midnight-ntwrk/compact-runtime`:
 
@@ -78,7 +94,7 @@ graph TB
 
 ---
 
-## 4. Privacy Model & Selective Disclosure
+## 5. Privacy Model & Selective Disclosure
 
 In Compact, data is private by default. Data only crosses into the public domain through deliberate `disclose()` language invocations:
 
@@ -94,7 +110,7 @@ In Compact, data is private by default. Data only crosses into the public domain
 
 ---
 
-## 5. Exported Smart Contract Circuits (8 Total $\le$ 10 Budget)
+## 6. Exported Smart Contract Circuits (8 Total $\le$ 10 Budget)
 
 To prevent block size transaction rejection on Midnight, Partio enforces a strict circuit budget ($\le 10$ circuits):
 
@@ -120,7 +136,7 @@ To prevent block size transaction rejection on Midnight, Partio enforces a stric
 
 ---
 
-## 6. Multi-Wallet Adapter & Network Switching
+## 7. Multi-Wallet Adapter & Network Switching
 
 Partio features a multi-wallet adapter supporting:
 - **1AM Wallet**: Native Midnight browser extension with shielded transaction signing and native popup approval dialogs.
@@ -131,7 +147,7 @@ Partio features a multi-wallet adapter supporting:
 
 ---
 
-## 7. User Cohort & Living Feedback Loop (Level 6 Compliance)
+## 8. User Cohort & Living Feedback Loop (Level 6 Compliance)
 
 To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 - **70 Verified Preprod Users**: Documented in [`USERS.md`](USERS.md) with on-chain transaction hashes and explorer links.
@@ -143,7 +159,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 ### User Feedback $\rightarrow$ Technical Fix Traceability Matrix:
 
 | # | Reported User Friction / Bug | User Sentiment | Root Cause | Implemented Resolution & Commit | Target Module |
-| :-: | :--- | :---: | :--- | :--- | :--- |
+| :-: | :--- | :--- | :--- | :--- | :--- |
 | **1** | *"1AM wallet kept throwing syncing error on Chrome. Had to restart browser twice."* | 🔴 Critical Bug (2/5) | 1AM extension throws transient error while fetching latest Preprod block headers. | Added automated 8s retry loop and resilient 5-stage address resolver testing all CIP-30 endpoints. | [`useMidnightWallet.ts`](frontend/src/hooks/useMidnightWallet.ts) |
 | **2** | *"Auditors had to request organizer private keys to audit payout fairness."* | 🟠 UX Friction (3/5) | Verification logic was previously coupled to organizer session state. | Created standalone `/verify` portal allowing anyone to query on-chain commitments without credentials. | [`PublicVerifyView.tsx`](frontend/src/components/dashboard/PublicVerifyView.tsx) |
 | **3** | *"Harsh dark background grid lines were visually noisy on OLED/4K displays."* | 🟠 Visual Bug (3/5) | Static CSS grid pattern clashed with modern card elevations. | Removed grid overlays; designed institutional obsidian titanium silk gradient with 60fps animations. | [`index.css`](frontend/src/index.css), [`BackgroundGrid.tsx`](frontend/src/components/layout/BackgroundGrid.tsx) |
@@ -153,7 +169,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 
 ---
 
-## 8. Public Links, Demo & Social Channels
+## 9. Public Links, Demo & Social Channels
 
 - **Live DApp Preview**: [http://localhost:5173](http://localhost:5173) (Local) / [Partio Live Demo](https://partio-midnight.vercel.app)
 - **Verified Preprod Contract**: [`26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e)
@@ -165,7 +181,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 
 ---
 
-## 9. Verification Test Suite & Scripts
+## 10. Verification Test Suite & Scripts
 
 ```bash
 # Run 16 automated Vitest circuit simulation tests
@@ -183,7 +199,7 @@ node scripts/verify-deployment.mjs
 
 ---
 
-## 10. Midnight Builder Challenge Levels 1–6 Milestone Matrix
+## 11. Midnight Builder Challenge Levels 1–6 Milestone Matrix
 
 | Level | Name | Focus | Required Criteria | Status |
 | :---: | :--- | :--- | :--- | :---: |
@@ -196,7 +212,7 @@ node scripts/verify-deployment.mjs
 
 ---
 
-## 11. Getting Started & Local Development
+## 12. Getting Started & Local Development
 
 ### Prerequisites
 - **Node.js**: v22.x LTS
@@ -231,6 +247,6 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 12. License
+## 13. License
 
 This project is licensed under the Apache 2.0 License — see the [LICENSE](LICENSE) file for details.
