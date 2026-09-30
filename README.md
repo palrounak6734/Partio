@@ -44,6 +44,7 @@ In traditional Web3 payroll and distribution tools, either:
 | 🐦 [**`docs/X-Profile.md`**](docs/X-Profile.md) | **Official Product X Profile & Threads** | Profile configuration (@PartioZK) and 4 complete launch tweet threads for community engagement |
 | 👥 [**`USERS.md`**](USERS.md) & [**`PREVIEW_USERS.md`**](PREVIEW_USERS.md) | **130 Multi-Network Verified Users** | 75 Preprod addresses + 35 Preview addresses + 20 Launch addresses with strictly 0 overlap |
 | 📊 [**`FEEDBACK.md`**](FEEDBACK.md) & [**`FEEDBACK_RESPONSES.csv`**](FEEDBACK_RESPONSES.csv) | **Living Feedback Loop & Traceability** | 95 authentic survey submissions, bug report root cause analysis, and commit fix matrix |
+| 📝 [**`docs/SURVEY_QUESTIONS.md`**](docs/SURVEY_QUESTIONS.md) | **Google Form Survey & Sheets Setup Guide** | 10 exact copy-paste survey questions, field types, and step-by-step Sheets linking guide |
 
 ---
 
@@ -187,7 +188,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 ## 10. Verification Test Suite & Scripts
 
 ```bash
-# Run 16 automated Vitest circuit simulation tests
+# Run 18 automated Vitest circuit simulation tests
 npm test --prefix contract
 
 # Run user cohort validation (130 unique verified addresses across Preprod and Preview, 0 overlap)
@@ -208,7 +209,7 @@ node scripts/verify-deployment.mjs
 | :---: | :--- | :--- | :--- | :---: |
 | **Level 1** | New Moon | Toolchain & Contract Foundation | Compact 0.5.2, proof server, deployed contract, 5+ commits | ✅ **PASSED** |
 | **Level 2** | Crescent Moon | Frontend & Privacy Behavior | Lace/1AM connect, circuit calls, observable ZK privacy, 8+ commits | ✅ **PASSED** |
-| **Level 3** | First Quarter | Hardening & CI/CD Pipeline | 16 unit tests, GitHub Actions CI/CD, approved idea (Splits), 10+ commits | ✅ **PASSED** |
+| **Level 3** | First Quarter | Hardening & CI/CD Pipeline | 18 unit tests, GitHub Actions CI/CD, approved idea (Partio Allocations), 10+ commits | ✅ **PASSED** |
 | **Level 4** | Waxing Gibbous | Preprod MVP & Public Docs | Live Preprod contract, full README architecture, Product X profile, 15+ commits | ✅ **PASSED** |
 | **Level 5** | Full Moon | User Onboarding & Feedback | 50 Preprod users, living feedback loop in `FEEDBACK.md`, 20+ commits | ✅ **PASSED** |
 | **Level 6** | Supermoon | Scaled Launch & Production Grade | 75 Preprod in [`USERS.md`](USERS.md), 35 Preview in [`PREVIEW_USERS.md`](PREVIEW_USERS.md), 20 in [`LAUNCH_USERS.md`](LAUNCH_USERS.md), 50+ commits | ✅ **PASSED** |
