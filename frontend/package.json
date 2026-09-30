@@ -13,6 +13,7 @@
     "@midnight-ntwrk/dapp-connector-api": "^4.0.1",
     "@midnight-ntwrk/midnight-js-contracts": "^4.1.1",
     "@midnight-ntwrk/midnight-js-types": "^4.1.1",
+    "buffer": "^6.0.3",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0",
     "partio": "file:..",

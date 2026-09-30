@@ -7,6 +7,14 @@ export default defineConfig({
     react(),
     wasm(),
   ],
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+    },
+  },
+  define: {
+    'global': 'globalThis',
+  },
   server: {
     port: 5173,
     host: true,
