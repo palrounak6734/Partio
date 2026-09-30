@@ -1,10 +1,10 @@
 # Partio — Official Product X (Twitter) Profile & Launch Strategy
 
-> **Profile Handle:** [@PartioZK](https://x.com/PartioZK)  
+> **Profile Handle:** [@partio_00](https://x.com/partio_00)  
 > **Display Name:** Partio | Confidential Contributor Partitioning  
 > **Bio:** Allocate fairly. Pay privately. Prove everything. Zero-knowledge contributor allocation & payroll protocol on @MidnightNtwrk. Built with Compact.  
 > **Location:** Midnight Preprod & Preview  
-> **Link:** [https://partio-midnight.vercel.app](https://partio-midnight.vercel.app)
+> **Link:** [https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)
 
 ---
 
@@ -17,13 +17,13 @@ Partio targets DAO treasuries, Web3 builders, grant programs, and ZK researchers
 ## 2. Launch Tweet Thread 1: Protocol Announcement (Impressions: 4,850+)
 
 ### Tweet 1 (Main Hook)
-> 🚨 Introducing **Partio** (@PartioZK): Confidential Contributor Partitioning on @MidnightNtwrk.
+> 🚨 Introducing **Partio** (@partio_00): Confidential Contributor Partitioning on @MidnightNtwrk.
 >
 > In Web3, sending payroll or splits on-chain exposes everyone’s salary to the entire world.
 >
 > Partio fixes this with zero-knowledge circuits: prove the split is mathematically correct without publishing anyone's payout. 🧵👇
 >
-> 🌐 Demo: partio-midnight.vercel.app  
+> 🌐 Demo: partio-midnight.netlify.app  
 > 📜 Contract: 26a116ed...004ae36e  
 > #MidnightNetwork #ZeroKnowledge #Web3Payroll #Cardano
 
@@ -50,7 +50,7 @@ Partio targets DAO treasuries, Web3 builders, grant programs, and ZK researchers
 > ✅ 1AM Wallet & Lace Integration + Demo Mode
 > ✅ Independent Auditor Portal (`/verify`)
 >
-> Test it live today on Midnight Preprod: [partio-midnight.vercel.app](https://partio-midnight.vercel.app)
+> Test it live today on Midnight Preprod: [partio-midnight.netlify.app](https://partio-midnight.netlify.app)
 
 ---
 

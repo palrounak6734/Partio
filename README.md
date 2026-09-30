@@ -61,7 +61,7 @@ In traditional Web3 payroll and distribution tools, either:
 | 📘 [**`docs/USAGE.md`**](docs/USAGE.md) | **Role-Based User Guide** | Step-by-step walkthroughs for Organization Admins, Allocation Managers, Contributors, and Auditors |
 | ⚡ [**`docs/CIRCUITS.md`**](docs/CIRCUITS.md) | **Zero-Knowledge Circuit Reference** | Mathematical constraint specifications, private inputs, and CIP-30 wallet approval mechanics |
 | 🎨 [**`docs/brand-brief.md`**](docs/brand-brief.md) | **Brand & Visual Identity System** | Typography, institutional color tokens (obsidian, titanium, emerald), and 60fps motion guidelines |
-| 🐦 [**`docs/X-Profile.md`**](docs/X-Profile.md) | **Official Product X Profile & Threads** | Profile configuration (@PartioZK) and 4 complete launch tweet threads for community engagement |
+| 🐦 [**`docs/X-Profile.md`**](docs/X-Profile.md) | **Official Product X Profile & Threads** | Profile configuration (@partio_00) and 4 complete launch tweet threads for community engagement |
 | 👥 [**`USERS.md`**](USERS.md) & [**`PREVIEW_USERS.md`**](PREVIEW_USERS.md) | **130 Multi-Network Verified Users** | 75 Preprod addresses + 35 Preview addresses + 20 Launch addresses with strictly 0 overlap |
 | 📊 [**`FEEDBACK.md`**](FEEDBACK.md) & [**`FEEDBACK_RESPONSES.csv`**](FEEDBACK_RESPONSES.csv) | **Living Feedback Loop & Traceability** | 95 authentic survey submissions, bug report root cause analysis, and commit fix matrix |
 | 📝 [**`docs/SURVEY_QUESTIONS.md`**](docs/SURVEY_QUESTIONS.md) | **Google Form Survey & Sheets Setup Guide** | 10 exact copy-paste survey questions, field types, and step-by-step Sheets linking guide |
@@ -206,7 +206,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 
 - **GitHub Repository**: [https://github.com/palrounak6734/Partio](https://github.com/palrounak6734/Partio)
 - **Live Netlify Production DApp**: [https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)
-- **Product X (Twitter) Profile**: [@PartioZK](https://x.com/PartioZK)
+- **Product X (Twitter) Profile**: [@partio_00](https://x.com/partio_00)
 - **Demo Walkthrough Video**: [Watch Demo Video (YouTube / Loom)](https://youtu.be/partio-midnight-demo)
 - **Google Feedback Form (Survey)**: [Partio Feedback Form (Google Forms)](https://forms.gle/partio-midnight-feedback)
 - **Public Feedback Responses Sheet**: [Partio Feedback Responses (Google Sheets)](https://docs.google.com/spreadsheets/d/1PartioPreprodFeedbackResponses/edit?usp=sharing)
