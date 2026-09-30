@@ -53,13 +53,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#121c29]/90 border-b border-slate-700/60 shadow-lg shadow-black/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
+    <header className="sticky top-0 z-50 w-full bg-[#0d1622] border-b border-slate-700/80 shadow-2xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-18 py-3">
         {/* Brand & Logo */}
         <motion.div 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex items-center gap-3 cursor-pointer" 
+          className="flex items-center gap-3 cursor-pointer shrink-0" 
           onClick={() => onSelectTab('overview')}
         >
           <div className="relative group">
@@ -67,24 +67,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src="/partio_logo.svg"
               alt="Partio Logo"
-              className="relative w-10 h-10 rounded-xl object-contain p-1 border border-emerald-400/40 bg-[#0a0f18]/80 shadow-lg shadow-emerald-500/20"
+              className="relative w-9 h-9 rounded-xl object-contain p-1 border border-emerald-400/40 bg-[#0a0f18] shadow-lg shadow-emerald-500/20"
             />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-300 bg-clip-text text-transparent">
-                Partio
-              </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shadow-sm shadow-emerald-500/10">
-                ZK-PARTITIONS
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-300 hidden xl:block font-medium">Confidential Contributor Partitioning on Midnight</p>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-300 bg-clip-text text-transparent">
+              Partio
+            </span>
+            <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shadow-sm shadow-emerald-500/10">
+              ZK-PARTITIONS
+            </span>
           </div>
         </motion.div>
 
         {/* Center: Desktop Navigation Tabs with Smooth Animated Pill */}
-        <nav className="hidden lg:flex items-center gap-1 p-1 bg-[#182332]/90 border border-slate-700/60 rounded-xl shadow-inner">
+        <nav className="hidden lg:flex items-center gap-1 p-1 bg-[#141f2e] border border-slate-700/70 rounded-xl shadow-inner">
           {navTabs.map((tab) => {
             const isActive = currentTab === tab.id;
             return (
@@ -111,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         {/* Right Actions: Network Switcher + Wallet */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Dynamic Network Switcher */}
           <NetworkSwitcher
             currentNetwork={currentNetwork}
@@ -121,15 +118,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isConnected ? (
             <div className="flex items-center gap-2">
               {/* Wallet Pill */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 text-xs">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs">
                 {balance && (
-                  <div className="hidden sm:flex items-center gap-1.5 border-r border-slate-800 pr-2 mr-1 text-slate-300 font-mono text-[11px]">
+                  <div className="hidden xl:flex items-center gap-1.5 border-r border-slate-800 pr-2 mr-1 text-slate-300 font-mono text-[11px]">
                     <Coins className="w-3 h-3 text-emerald-400" />
                     <span>{balance.tNight} tNIGHT</span>
                   </div>
                 )}
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="font-mono text-emerald-200 text-xs">
+                <span className="font-mono text-emerald-200 text-xs font-medium">
                   {truncateAddress(address, 6, 4)}
                 </span>
                 <button

@@ -8,9 +8,10 @@ import { AllocationCertificateModal } from './AllocationCertificateModal';
 interface PublicVerifyViewProps {
   projects: ProjectData[];
   network: NetworkId;
+  onSelectProject?: (projectId: string) => void;
 }
 
-export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, network }) => {
+export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, network, onSelectProject }) => {
   const activeConfig = NETWORK_CONFIGS[network];
   const [queryId, setQueryId] = useState('');
   const [searchedProject, setSearchedProject] = useState<ProjectData | null>(projects[0] || null);
@@ -20,12 +21,26 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setHasSearched(true);
+    const q = queryId.trim().toLowerCase();
+    if (!q) {
+      setSearchedProject(projects[0] || null);
+      return;
+    }
+
     const found = projects.find(
       (p) =>
-        p.id.toLowerCase() === queryId.trim().toLowerCase() ||
-        p.name.toLowerCase().includes(queryId.trim().toLowerCase())
+        p.id.toLowerCase().includes(q) ||
+        p.name.toLowerCase().includes(q) ||
+        p.poolCommitment.toLowerCase().includes(q)
     );
     setSearchedProject(found || null);
+  };
+
+  const handleQuickSelect = (p: ProjectData) => {
+    setSearchedProject(p);
+    setQueryId(p.id);
+    setHasSearched(true);
+    if (onSelectProject) onSelectProject(p.id);
   };
 
   return (
@@ -34,7 +49,7 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="p-6 rounded-2xl bg-[#152130]/90 backdrop-blur-xl border border-slate-700/60 shadow-xl"
+        className="p-6 rounded-2xl bg-[#152130] border border-slate-700/60 shadow-xl"
       >
         <div className="max-w-2xl mx-auto text-center mb-8">
           <motion.div
@@ -54,16 +69,38 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
           </p>
         </div>
 
+        {/* Quick Select Projects Chips */}
+        <div className="max-w-xl mx-auto mb-4">
+          <div className="text-[11px] font-semibold text-slate-400 mb-2">Select Active Project to Verify:</div>
+          <div className="flex flex-wrap gap-2">
+            {projects.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleQuickSelect(p)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all text-left ${
+                  searchedProject?.id === p.id
+                    ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                }`}
+              >
+                <div className="font-bold text-slate-200">{p.name}</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">{p.id}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Search bar */}
         <form onSubmit={handleSearch} className="max-w-xl mx-auto flex gap-2">
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Enter Project ID (e.g. proj-001-shield-treasury) or Nullifier..."
+              placeholder="Search by Project ID, Name, or Commitment Hash..."
               value={queryId}
               onChange={(e) => setQueryId(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-900/90 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 shadow-inner"
+              className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500 shadow-inner"
             />
           </div>
           <motion.button
@@ -84,7 +121,7 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mt-8 max-w-xl mx-auto p-5 rounded-2xl bg-[#1a293b]/80 border border-emerald-500/40 shadow-xl space-y-4"
+              className="mt-6 max-w-xl mx-auto p-5 rounded-2xl bg-[#141f2e] border border-emerald-500/40 shadow-xl space-y-4"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
                 <div className="flex items-center gap-2">
@@ -116,12 +153,19 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
 
                 <div className="flex justify-between py-1 border-b border-slate-700/40">
                   <span className="text-slate-400">Rule Enforcement Type:</span>
-                  <span className="capitalize text-slate-200">{searchedProject.ruleType} Partition</span>
+                  <span className="capitalize text-slate-200">{searchedProject.ruleType} Partition (Sum = 100%)</span>
+                </div>
+
+                <div className="flex justify-between py-1 border-b border-slate-700/40">
+                  <span className="text-slate-400">On-Chain Target Network:</span>
+                  <span className="text-emerald-300 font-semibold">{activeConfig.name}</span>
                 </div>
 
                 <div className="flex justify-between py-1">
-                  <span className="text-slate-400">On-Chain Target Network:</span>
-                  <span className="text-emerald-300 font-semibold">{activeConfig.name}</span>
+                  <span className="text-slate-400">Midnight Contract Address:</span>
+                  <span className="font-mono text-[11px] text-slate-300">
+                    {activeConfig.contractAddress.slice(0, 12)}...{activeConfig.contractAddress.slice(-8)}
+                  </span>
                 </div>
               </div>
 
@@ -155,12 +199,12 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mt-8 max-w-xl mx-auto p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-xs"
+              className="mt-6 max-w-xl mx-auto p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-xs"
             >
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
               <div>
                 <div className="font-semibold">Project Not Found</div>
-                <div>No project matched "{queryId}". Please verify the project identifier and try again.</div>
+                <div>No project matched "{queryId}". Please select one of the active projects above or verify the identifier.</div>
               </div>
             </motion.div>
           ) : null}

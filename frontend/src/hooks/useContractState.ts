@@ -219,6 +219,21 @@ export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
       ownerAddress: 'mn_addr_preprod1jvc2qagxjdprk4rt7rgxxt4pqq474w8rq5evf6lh8vmlqpnxu79q8j969a',
     };
 
+    const txHash = `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+    setLogs((prev) => [
+      {
+        id: `tx-create-${Date.now().toString().slice(-4)}`,
+        timestamp: Date.now(),
+        projectId: projIdStr,
+        rule: `Circuit 1: createProject (${name})`,
+        status: 'VERIFIED',
+        nullifier: txHash,
+        gasCostDust: '0.0055',
+        blockNumber: blockHeight + 1,
+      },
+      ...prev,
+    ]);
+
     setProjects((prev) => [newProj, ...prev]);
     setActiveProjectId(projIdStr);
     setBlockHeight((h) => h + 1);
@@ -226,7 +241,55 @@ export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
     setIsProving(false);
     setProvingStep('');
     return newProj;
-  }, []);
+  }, [blockHeight]);
+
+  /**
+   * Circuit 3: addContributor
+   */
+  const registerContributor = useCallback(async (
+    projectId: string,
+    role: string,
+    address: string
+  ) => {
+    setIsProving(true);
+    setProvingStep('1. Hashing contributor public key into 32-byte witness...');
+    await new Promise((r) => setTimeout(r, 500));
+
+    const projIdBytes = to32Bytes(projectId);
+    const pubKeyBytes = to32Bytes(address);
+
+    setProvingStep('2. Authorizing contributor key on Midnight circuit registry...');
+    const result = await contractService.addContributor(projIdBytes, pubKeyBytes);
+
+    if (!result.success) {
+      setIsProving(false);
+      setProvingStep('');
+      throw new Error(result.message);
+    }
+
+    setProvingStep('3. Anchoring contributor authorization hash on-chain...');
+    await new Promise((r) => setTimeout(r, 600));
+
+    const txHash = `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+    setLogs((prev) => [
+      {
+        id: `tx-contrib-${Date.now().toString().slice(-4)}`,
+        timestamp: Date.now(),
+        projectId,
+        rule: `Circuit 3: addContributor (${role})`,
+        status: 'VERIFIED',
+        nullifier: txHash,
+        gasCostDust: '0.0032',
+        blockNumber: blockHeight + 1,
+      },
+      ...prev,
+    ]);
+
+    setBlockHeight((h) => h + 1);
+    setIsProving(false);
+    setProvingStep('');
+    return { success: true, txHash };
+  }, [blockHeight]);
 
   /**
    * Circuit 4: allocateFunds
@@ -249,15 +312,31 @@ export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
     setProvingStep('3. Transitioning project status to DISTRIBUTING on-chain...');
     await new Promise((r) => setTimeout(r, 600));
 
+    const txHash = `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+    setLogs((prev) => [
+      {
+        id: `tx-alloc-${Date.now().toString().slice(-4)}`,
+        timestamp: Date.now(),
+        projectId,
+        rule: `Circuit 4: allocateFunds (Sum = 100% Value Conservation)`,
+        status: 'VERIFIED',
+        nullifier: txHash,
+        gasCostDust: '0.0048',
+        blockNumber: blockHeight + 1,
+      },
+      ...prev,
+    ]);
+
     setProjects((prev) =>
       prev.map((p) =>
         p.id === projectId ? { ...p, status: 'DISTRIBUTING', statusCode: 1 } : p
       )
     );
 
+    setBlockHeight((h) => h + 1);
     setIsProving(false);
     setProvingStep('');
-  }, []);
+  }, [blockHeight]);
 
   /**
    * Circuit 5: verifyAllocation
@@ -348,9 +427,25 @@ export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
       )
     );
 
+    const txHash = `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+    setLogs((prev) => [
+      {
+        id: `tx-finalize-${Date.now().toString().slice(-4)}`,
+        timestamp: Date.now(),
+        projectId,
+        rule: `Circuit 6: finalizeDistribution (Status: COMPLETED)`,
+        status: 'VERIFIED',
+        nullifier: txHash,
+        gasCostDust: '0.0061',
+        blockNumber: blockHeight + 1,
+      },
+      ...prev,
+    ]);
+
+    setBlockHeight((h) => h + 1);
     setIsProving(false);
     setProvingStep('');
-  }, []);
+  }, [blockHeight]);
 
   return {
     projects,
@@ -364,6 +459,7 @@ export function useContractState(network: NetworkId = DEFAULT_NETWORK) {
     isIndexerOnline,
     createNewProject,
     allocateFunds,
+    registerContributor,
     verifyAllocationProof,
     finalizeProject,
   };

@@ -51,6 +51,7 @@ export function App() {
     provingStep,
     createNewProject,
     allocateFunds,
+    registerContributor,
     verifyAllocationProof,
   } = useContractState(network);
 
@@ -173,9 +174,14 @@ export function App() {
         {currentTab === 'splits' && (
           <div className="space-y-6">
             <SplitsView
+              projects={projects}
               project={activeProject}
+              onSelectProject={setActiveProjectId}
               onAllocateFunds={async (projId, pct) => {
                 await allocateFunds(projId, pct);
+              }}
+              onVerifyAllocation={async (projId, amount, pct) => {
+                await verifyAllocationProof(projId, amount, pct);
               }}
               isProving={isProving}
             />
@@ -194,7 +200,12 @@ export function App() {
 
         {currentTab === 'contributors' && (
           <ContributorsView
+            projects={projects}
             project={activeProject}
+            onSelectProject={setActiveProjectId}
+            onRegisterContributor={async (projId, role, addr) => {
+              await registerContributor(projId, role, addr);
+            }}
             isProving={isProving}
           />
         )}
@@ -214,7 +225,11 @@ export function App() {
         )}
 
         {currentTab === 'verify' && (
-          <PublicVerifyView projects={projects} network={network} />
+          <PublicVerifyView
+            projects={projects}
+            network={network}
+            onSelectProject={setActiveProjectId}
+          />
         )}
           </motion.div>
         </AnimatePresence>

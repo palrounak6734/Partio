@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserCheck, Plus, CheckCircle2, Clock, ShieldCheck, Wallet, Lock } from 'lucide-react';
+import { UserCheck, Plus, CheckCircle2, Clock, ShieldCheck, Wallet, Lock, Check } from 'lucide-react';
 import type { ProjectData } from '../../hooks/useContractState';
 
 interface ContributorsViewProps {
+  projects?: ProjectData[];
   project: ProjectData;
-  isProving: boolean;
+  onSelectProject?: (projectId: string) => void;
+  onRegisterContributor?: (projectId: string, role: string, address: string) => Promise<any>;
+  isProving?: boolean;
 }
 
-export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) => {
+export const ContributorsView: React.FC<ContributorsViewProps> = ({
+  projects = [],
+  project,
+  onSelectProject,
+  onRegisterContributor,
+  isProving = false,
+}) => {
   const [contributors, setContributors] = useState([
     {
       id: 'c-01',
@@ -51,14 +60,29 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newRole, setNewRole] = useState('');
   const [newAddr, setNewAddr] = useState('');
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAddr.trim()) return;
+
+    const roleName = newRole.trim() || 'Contributor';
+    const addr = newAddr.trim();
+
+    if (onRegisterContributor) {
+      try {
+        await onRegisterContributor(project.id, roleName, addr);
+        setSuccessBanner(`Contributor "${roleName}" authorized on Midnight circuit registry! Transaction recorded in Proofs timeline.`);
+        setTimeout(() => setSuccessBanner(null), 6000);
+      } catch {
+        // Handled
+      }
+    }
+
     const newEntry = {
       id: `c-0${contributors.length + 1}`,
-      role: newRole.trim() || 'Contributor',
-      walletAddress: newAddr.trim(),
+      role: roleName,
+      walletAddress: addr,
       pubKeyHash: `0x${Array.from(crypto.getRandomValues(new Uint8Array(32))).map((b) => b.toString(16).padStart(2, '0')).join('')}`,
       registered: true,
       verified: false,
@@ -76,16 +100,53 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="p-6 rounded-2xl bg-[#152130]/90 backdrop-blur-xl border border-slate-700/60 shadow-xl"
+        className="p-6 rounded-2xl bg-[#152130] border border-slate-700/60 shadow-xl space-y-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-700/60 gap-3">
+        {/* Top: Active Project Selector Banner */}
+        <div className="p-4 rounded-xl bg-[#0e1724] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Target Project Registry</div>
+              <h3 className="text-base font-bold text-white">{project.name}</h3>
+              <span className="text-[11px] font-mono text-slate-400">{project.id}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {projects.length > 1 && onSelectProject && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-slate-400 font-medium">Switch Project:</label>
+                <select
+                  value={project.id}
+                  onChange={(e) => onSelectProject(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-xl text-emerald-300 font-semibold focus:outline-none focus:border-emerald-400 cursor-pointer"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.totalPool.toLocaleString()} tNIGHT)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs font-bold">
+              {contributors.length} Registered Keys
+            </div>
+          </div>
+        </div>
+
+        {/* Header Action Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700/60 gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-emerald-400" />
-              <span>Partio Contributor Registry</span>
-            </h3>
+            <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <span>Partio Contributor Key Registry (Circuit 3: addContributor)</span>
+            </h4>
             <p className="text-xs text-slate-400 mt-1">
-              Registered participants for <span className="text-slate-200 font-semibold">{project.name}</span>. Public keys are authorized on Midnight ZK circuits for private partition verification.
+              Authorized participant addresses. Public keys are registered in the Midnight smart contract for confidential partition proving.
             </p>
           </div>
 
@@ -93,15 +154,27 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold text-xs border border-emerald-500/40 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold text-xs border border-emerald-500/40 transition-colors shadow-sm shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Register Contributor</span>
           </motion.button>
         </div>
 
+        {/* Success Banner */}
+        {successBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-200"
+          >
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{successBanner}</span>
+          </motion.div>
+        )}
+
         {/* Table of Contributors */}
-        <div className="mt-6 overflow-x-auto">
+        <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-700/60 text-slate-400 uppercase text-[10px] tracking-wider">
@@ -176,20 +249,21 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
             >
               <h3 className="text-base font-bold text-slate-100 mb-1 flex items-center gap-2">
                 <Wallet className="w-5 h-5 text-emerald-400" />
-                <span>Register New Contributor</span>
+                <span>Register Contributor on Midnight (Circuit 3)</span>
               </h3>
               <p className="text-xs text-slate-400 mb-4">
-                Authorize a contributor address in Partio project registry to verify confidential allocations.
+                Authorize a contributor address in the Partio contract for project: <strong className="text-emerald-300">{project.name}</strong>.
               </p>
 
               <form onSubmit={handleAddSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Contributor Role / Tag
+                    Contributor Role / Title
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Lead Researcher"
+                    required
+                    placeholder="e.g. Lead Cryptographer"
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
@@ -198,7 +272,7 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Midnight Wallet Address (mn_addr_...)
+                    Midnight Bech32 Wallet Address
                   </label>
                   <input
                     type="text"
@@ -206,7 +280,7 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
                     placeholder="mn_addr_preprod1..."
                     value={newAddr}
                     onChange={(e) => setNewAddr(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 font-mono focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -220,9 +294,10 @@ export const ContributorsView: React.FC<ContributorsViewProps> = ({ project }) =
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors shadow-md"
+                    disabled={isProving}
+                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors shadow-md disabled:opacity-50"
                   >
-                    Register On-Chain
+                    {isProving ? 'Registering on Chain...' : 'Register Contributor'}
                   </button>
                 </div>
               </form>

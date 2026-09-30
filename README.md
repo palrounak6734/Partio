@@ -207,7 +207,10 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 - **GitHub Repository**: [https://github.com/palrounak6734/Partio](https://github.com/palrounak6734/Partio)
 - **Live Netlify Production DApp**: [https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)
 - **Product X (Twitter) Profile**: [@partio_00](https://x.com/partio_00)
-- **Demo Walkthrough Video**: [Watch Demo Video (YouTube / Loom)](https://youtu.be/partio-midnight-demo)
+- **Demo Walkthrough Video**: [Watch Demo Video on YouTube](https://www.youtube.com/watch?v=w4O5nR2VKhI)
+
+[![Partio Demo Video](https://img.youtube.com/vi/w4O5nR2VKhI/0.jpg)](https://www.youtube.com/watch?v=w4O5nR2VKhI)
+
 - **Google Feedback Form (Survey)**: [Partio Feedback Form (Google Forms)](https://forms.gle/partio-midnight-feedback)
 - **Public Feedback Responses Sheet**: [Partio Feedback Responses (Google Sheets)](https://docs.google.com/spreadsheets/d/1PartioPreprodFeedbackResponses/edit?usp=sharing)
 
