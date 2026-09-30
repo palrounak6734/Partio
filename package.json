@@ -1,21 +1,22 @@
 {
-  "name": "splitshield",
-  "version": "0.1.0",
-  "description": "SplitShield — Privacy-Preserving Payment Splits on Midnight",
+  "name": "partio",
+  "version": "1.0.0",
+  "description": "Partio — Confidential Contributor Partitioning & Allocation Protocol on Midnight",
   "private": true,
   "workspaces": [
     "contract",
     "frontend"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --prefix frontend",
+    "test": "npm run test:contract",
     "compile:contract": "npm run compile --prefix contract",
     "test:contract": "npm run test --prefix contract",
     "check-balance": "npm run check-balance --prefix contract",
     "deploy:contract": "npm run deploy --prefix contract",
     "network": "npm run network --prefix contract",
-    "dev:frontend": "npm run dev --prefix frontend"
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend"
   },
   "keywords": [
     "midnight",
@@ -23,9 +24,14 @@
     "zero-knowledge",
     "privacy",
     "zk-proofs",
-    "payment-splits",
-    "private-payroll"
+    "allocation-protocol",
+    "private-payroll",
+    "dao-governance"
   ],
-  "author": "bishalnium <bishalpvtxd@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/palrounak6734/Partio.git"
+  },
+  "author": "palrounak6734 <rounakp803@gmail.com>",
   "license": "Apache-2.0"
 }

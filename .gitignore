@@ -21,6 +21,9 @@ CHALLENGE_PROGRESS.md
 *RECOVERY*.md
 *PRIVATE*.md
 
+# Raw feedback responses CSV (User managed via Google Forms / Sheets)
+FEEDBACK_RESPONSES.csv
+
 # IDE
 .vscode/
 .idea/
