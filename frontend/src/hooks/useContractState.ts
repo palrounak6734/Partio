@@ -12,6 +12,7 @@ export interface ProjectData {
   statusCode: number; // 0, 1, 2
   ruleType: 'percentage' | 'equal' | 'capped';
   ruleDescription: string;
+  ruleHash?: string;
   createdAt: number;
   poolCommitment: string;
   ownerAddress: string;

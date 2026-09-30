@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShieldCheck, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Search, ShieldCheck, CheckCircle2, AlertCircle, ExternalLink, FileCheck2 } from 'lucide-react';
 import type { ProjectData } from '../../hooks/useContractState';
 import { NETWORK_CONFIGS, type NetworkId } from '../../utils/constants';
+import { AllocationCertificateModal } from './AllocationCertificateModal';
 
 interface PublicVerifyViewProps {
   projects: ProjectData[];
@@ -14,6 +15,7 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
   const [queryId, setQueryId] = useState('');
   const [searchedProject, setSearchedProject] = useState<ProjectData | null>(projects[0] || null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isCertOpen, setIsCertOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,16 +125,27 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
                 </div>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  type="button"
+                  onClick={() => setIsCertOpen(true)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-emerald-500/15"
+                >
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>View Allocation Certificate</span>
+                </motion.button>
+
                 <motion.a
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   href={`${activeConfig.explorerUrl}/contract/${activeConfig.contractAddress}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold border border-emerald-500/30 transition-colors shadow-sm"
+                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold border border-emerald-500/30 transition-colors shadow-sm"
                 >
-                  <span>Audit Contract State on Midnight Explorer</span>
+                  <span>Audit On Explorer</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </motion.a>
               </div>
@@ -153,6 +166,15 @@ export const PublicVerifyView: React.FC<PublicVerifyViewProps> = ({ projects, ne
           ) : null}
         </AnimatePresence>
       </motion.div>
+
+      {searchedProject && (
+        <AllocationCertificateModal
+          isOpen={isCertOpen}
+          onClose={() => setIsCertOpen(false)}
+          project={searchedProject}
+          network={network}
+        />
+      )}
     </div>
   );
 };
