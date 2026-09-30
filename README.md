@@ -295,3 +295,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ## 14. License
 
 This project is licensed under the Apache 2.0 License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+*Partio — Confidential Contributor Partitioning on Midnight Network. Built and maintained by [@palrounak6734](https://github.com/palrounak6734).*
