@@ -208,7 +208,7 @@ node scripts/verify-deployment.mjs
 | **Level 3** | First Quarter | Hardening & CI/CD Pipeline | 16 unit tests, GitHub Actions CI/CD, approved idea (Splits), 10+ commits | ✅ **PASSED** |
 | **Level 4** | Waxing Gibbous | Preprod MVP & Public Docs | Live Preprod contract, full README architecture, Product X profile, 15+ commits | ✅ **PASSED** |
 | **Level 5** | Full Moon | User Onboarding & Feedback | 50 Preprod users, living feedback loop in `FEEDBACK.md`, 20+ commits | ✅ **PASSED** |
-| **Level 6** | Supermoon | Scaled Launch & Production Grade | 70 Preprod users in `USERS.md`, 20 in `LAUNCH_USERS.md`, 30+ commits | ✅ **PASSED** (33 Commits) |
+| **Level 6** | Supermoon | Scaled Launch & Production Grade | 70 Preprod users in [`USERS.md`](USERS.md), 20 in [`LAUNCH_USERS.md`](LAUNCH_USERS.md), 30+ commits | ✅ **PASSED** (38 Commits) |
 
 ---
 
