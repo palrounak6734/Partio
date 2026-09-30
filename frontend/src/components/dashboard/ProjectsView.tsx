@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Shield, Coins, Users, Search } from 'lucide-react';
+import { Plus, Shield, Coins, Users, Search, FileCheck2 } from 'lucide-react';
 import type { ProjectData } from '../../hooks/useContractState';
+import { type NetworkId } from '../../utils/constants';
+import { AllocationCertificateModal } from './AllocationCertificateModal';
 
 interface ProjectsViewProps {
   projects: ProjectData[];
+  network?: NetworkId;
   onSelectProject: (id: string) => void;
   onCreateNewProject: (name: string, totalPool: number, participants: number, ruleType: 'percentage' | 'equal' | 'capped') => Promise<any>;
   isProving: boolean;
@@ -14,6 +17,7 @@ interface ProjectsViewProps {
 
 export const ProjectsView: React.FC<ProjectsViewProps> = ({
   projects,
+  network = 'preprod',
   onSelectProject,
   onCreateNewProject,
   isProving,
@@ -23,6 +27,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'DISTRIBUTING' | 'COMPLETED'>('ALL');
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedCertProject, setSelectedCertProject] = useState<ProjectData | null>(null);
 
   // New project form state
   const [newTitle, setNewTitle] = useState('');
@@ -163,6 +168,29 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Card Footer with Certificate Button */}
+              <div className="mt-3.5 pt-3 border-t border-slate-700/50 flex items-center justify-between text-xs">
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {p.id.slice(0, 14)}...
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCertProject(p);
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors flex items-center gap-1 shadow-sm"
+                  >
+                    <FileCheck2 className="w-3 h-3 text-emerald-400" />
+                    <span>Certificate</span>
+                  </button>
+                  <span className="text-emerald-400 text-[11px] font-semibold">
+                    Manage →
+                  </span>
+                </div>
+              </div>
             </motion.div>
           );
         })}
@@ -271,6 +299,15 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {selectedCertProject && (
+        <AllocationCertificateModal
+          isOpen={!!selectedCertProject}
+          onClose={() => setSelectedCertProject(null)}
+          project={selectedCertProject}
+          network={network}
+        />
       )}
     </div>
   );

@@ -156,6 +156,7 @@ export function App() {
         {currentTab === 'projects' && (
           <ProjectsView
             projects={projects}
+            network={network}
             onSelectProject={(id) => {
               setActiveProjectId(id);
               setCurrentTab('overview');
