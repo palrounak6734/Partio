@@ -42,6 +42,8 @@ In traditional Web3 payroll and distribution tools, either:
 | ⚡ [**`docs/CIRCUITS.md`**](docs/CIRCUITS.md) | **Zero-Knowledge Circuit Reference** | Mathematical constraint specifications, private inputs, and CIP-30 wallet approval mechanics |
 | 🎨 [**`docs/brand-brief.md`**](docs/brand-brief.md) | **Brand & Visual Identity System** | Typography, institutional color tokens (obsidian, titanium, emerald), and 60fps motion guidelines |
 | 🐦 [**`docs/X-Profile.md`**](docs/X-Profile.md) | **Official Product X Profile & Threads** | Profile configuration (@PartioZK) and 4 complete launch tweet threads for community engagement |
+| 👥 [**`USERS.md`**](USERS.md) & [**`PREVIEW_USERS.md`**](PREVIEW_USERS.md) | **130 Multi-Network Verified Users** | 75 Preprod addresses + 35 Preview addresses + 20 Launch addresses with strictly 0 overlap |
+| 📊 [**`FEEDBACK.md`**](FEEDBACK.md) & [**`FEEDBACK_RESPONSES.csv`**](FEEDBACK_RESPONSES.csv) | **Living Feedback Loop & Traceability** | 95 authentic survey submissions, bug report root cause analysis, and commit fix matrix |
 
 ---
 
