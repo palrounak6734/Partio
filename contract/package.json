@@ -4,7 +4,7 @@
   "type": "module",
   "description": "SplitShield Compact Zero-Knowledge Circuits & Contract",
   "scripts": {
-    "compile": "wsl -d Ubuntu -e bash -c \"~/.local/bin/compact compile '/mnt/c/Users/bisha/Videos/midnight projects/SplitShield/contract/src/splitshield.compact' '/mnt/c/Users/bisha/Videos/midnight projects/SplitShield/contract/managed'\"",
+    "compile": "wsl -d Ubuntu -e bash -c \"~/.local/bin/compact compile '/mnt/c/Users/bisha/Videos/midnight projects/partio/contract/src/splitshield.compact' '/mnt/c/Users/bisha/Videos/midnight projects/partio/contract/managed'\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "check-balance": "npx tsx scripts/check-balance.ts",
