@@ -1,0 +1,20 @@
+# Netlify Build Configuration for Partio DApp
+
+[build]
+  base = "frontend"
+  publish = "dist"
+  command = "npm run build"
+
+# SPA Routing: Redirect all routes to index.html for client-side navigation
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# HTTP Headers for Web3 & WASM security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

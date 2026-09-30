@@ -8,7 +8,7 @@
   [![Network](https://img.shields.io/badge/Midnight-Preprod%20%26%20Preview-10b981)](https://midnightexplorer.com)
   [![Compact](https://img.shields.io/badge/Compact-0.5.2-f59e0b)](https://docs.midnight.network)
   [![Circuit Budget](https://img.shields.io/badge/Circuits-8%20%2F%2010%20Max-06b6d4)](https://github.com/palrounak6734/Partio)
-  [![Vercel Ready](https://img.shields.io/badge/Vercel-Deployed-black?logo=vercel)](https://partio-midnight.vercel.app)
+  [![Netlify](https://img.shields.io/badge/Netlify-Deployed-00C7B7?logo=netlify&logoColor=white)](https://partio-midnight.netlify.app)
   [![License](https://img.shields.io/badge/License-Apache_2.0-8b5cf6)](LICENSE)
 </div>
 
@@ -192,7 +192,7 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 
 ---
 
-## 10. Public Links, Verified Contracts & Vercel Deployment
+## 10. Public Links, Verified Contracts & Netlify Deployment
 
 ### ⛓️ Verified Smart Contract Addresses
 
@@ -205,20 +205,21 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 ### 🌐 Official Repositories & Deployments
 
 - **GitHub Repository**: [https://github.com/palrounak6734/Partio](https://github.com/palrounak6734/Partio)
-- **Live Vercel Production DApp**: [https://partio-midnight.vercel.app](https://partio-midnight.vercel.app)
+- **Live Netlify Production DApp**: [https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)
 - **Product X (Twitter) Profile**: [@PartioZK](https://x.com/PartioZK)
 - **Demo Walkthrough Video**: [Watch Demo Video (YouTube / Loom)](https://youtu.be/partio-midnight-demo)
 - **Google Feedback Form (Survey)**: [Partio Feedback Form (Google Forms)](https://forms.gle/partio-midnight-feedback)
 - **Public Feedback Responses Sheet**: [Partio Feedback Responses (Google Sheets)](https://docs.google.com/spreadsheets/d/1PartioPreprodFeedbackResponses/edit?usp=sharing)
 
-### 🚀 Zero-Config Vercel Deployment
-Partio includes built-in [`vercel.json`](vercel.json) configuration supporting both monorepo root imports and subfolder root directory builds:
-1. Import repository `https://github.com/palrounak6734/Partio` into [Vercel](https://vercel.com).
-2. Framework Preset: **Vite** (auto-detected).
-3. Root Directory: `./` (or `frontend`).
-4. Build Command: `npm run build --prefix frontend` (auto-configured).
-5. Output Directory: `frontend/dist` (or `dist`).
-6. Click **Deploy**. Vercel will build and serve Partio globally with full client-side routing support.
+### 🚀 Zero-Config Netlify Deployment (No Phone Verification Needed)
+Partio includes pre-configured [`netlify.toml`](netlify.toml) and [`frontend/public/_redirects`](frontend/public/_redirects) for instant 1-click deployment without needing phone verification:
+1. Go to [Netlify Dashboard](https://app.netlify.com) and click **Add new site** $\rightarrow$ **Import an existing project**.
+2. Select **GitHub** and choose `palrounak6734/Partio`.
+3. Netlify automatically detects `netlify.toml`:
+   - **Base directory:** `frontend`
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+4. Click **Deploy Partio**. Netlify will build and deploy the application with full client-side routing support.
 
 ---
 

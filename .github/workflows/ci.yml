@@ -100,10 +100,10 @@ jobs:
           retention-days: 7
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # JOB 3: Multi-Network Preprod & Vercel Readiness
+  # JOB 3: Multi-Network Preprod & Netlify Readiness
   # ─────────────────────────────────────────────────────────────────────────────
   deployment-readiness:
-    name: 3. Multi-Network Preprod & Vercel Readiness
+    name: 3. Multi-Network Preprod & Netlify Readiness
     needs: [contract-ci, frontend-ci]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -132,13 +132,13 @@ jobs:
             console.log('✅ Preview GraphQL Indexer: https://indexer.preview.midnight.network/api/v4/graphql');
           "
 
-      - name: Verify Vercel Deployment Configurations
+      - name: Verify Netlify Deployment Configuration
         run: |
           node -e "
             const fs = require('fs');
-            JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
-            JSON.parse(fs.readFileSync('frontend/vercel.json', 'utf8'));
-            console.log('✅ Root and Frontend vercel.json configurations validated.');
+            if (!fs.existsSync('netlify.toml')) throw new Error('Missing netlify.toml');
+            if (!fs.existsSync('frontend/public/_redirects')) throw new Error('Missing _redirects file');
+            console.log('✅ Root netlify.toml and SPA _redirects verified.');
           "
 
       - name: Verify SplitShield Compiled Bytecode & Key Assets
