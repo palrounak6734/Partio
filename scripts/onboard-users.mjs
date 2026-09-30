@@ -11,10 +11,16 @@ console.log('     Partio User Cohort Verification & Onboarding Checker       ');
 console.log('================================================================\n');
 
 const usersFile = path.join(rootDir, 'USERS.md');
+const previewUsersFile = path.join(rootDir, 'PREVIEW_USERS.md');
 const launchUsersFile = path.join(rootDir, 'LAUNCH_USERS.md');
 
 if (!fs.existsSync(usersFile)) {
   console.error('❌ ERROR: USERS.md file not found!');
+  process.exit(1);
+}
+
+if (!fs.existsSync(previewUsersFile)) {
+  console.error('❌ ERROR: PREVIEW_USERS.md file not found!');
   process.exit(1);
 }
 
@@ -24,23 +30,35 @@ if (!fs.existsSync(launchUsersFile)) {
 }
 
 const usersContent = fs.readFileSync(usersFile, 'utf8');
+const previewContent = fs.readFileSync(previewUsersFile, 'utf8');
 const launchContent = fs.readFileSync(launchUsersFile, 'utf8');
 
 // Extract addresses via regex
-const addressRegex = /mn_addr_preprod1[a-z0-9]+/g;
-const usersAddresses = [...new Set(usersContent.match(addressRegex) || [])];
-const launchAddresses = [...new Set(launchContent.match(addressRegex) || [])];
+const preprodRegex = /mn_addr_preprod1[a-z0-9]+/g;
+const previewRegex = /mn_addr_preview1[a-z0-9]+/g;
 
-console.log(`📋 Found in USERS.md:         ${usersAddresses.length} unique addresses`);
-console.log(`🚀 Found in LAUNCH_USERS.md:  ${launchAddresses.length} unique addresses`);
+const preprodAddresses = [...new Set(usersContent.match(preprodRegex) || [])];
+const previewAddresses = [...new Set(previewContent.match(previewRegex) || [])];
+const launchAddresses = [...new Set(launchContent.match(preprodRegex) || [])];
+
+console.log(`📋 Found in USERS.md (Preprod):        ${preprodAddresses.length} unique addresses`);
+console.log(`🌐 Found in PREVIEW_USERS.md (Preview):  ${previewAddresses.length} unique addresses`);
+console.log(`🚀 Found in LAUNCH_USERS.md (Cohort):   ${launchAddresses.length} unique addresses`);
 
 // Verification 1: Count requirements
 let hasErrors = false;
-if (usersAddresses.length < 70) {
-  console.error(`❌ ERROR: USERS.md contains ${usersAddresses.length} addresses; minimum 70 required for Level 6!`);
+if (preprodAddresses.length < 75) {
+  console.error(`❌ ERROR: USERS.md contains ${preprodAddresses.length} addresses; minimum 75 required for Level 6!`);
   hasErrors = true;
 } else {
-  console.log('✅ Level 6 Requirement: >= 70 verified Preprod addresses in USERS.md met.');
+  console.log('✅ Level 6 Preprod Requirement: >= 75 verified Preprod addresses in USERS.md met.');
+}
+
+if (previewAddresses.length < 35) {
+  console.error(`❌ ERROR: PREVIEW_USERS.md contains ${previewAddresses.length} addresses; minimum 35 required!`);
+  hasErrors = true;
+} else {
+  console.log('✅ Level 6 Preview Requirement: >= 35 verified Preview addresses in PREVIEW_USERS.md met.');
 }
 
 if (launchAddresses.length < 20) {
@@ -51,22 +69,28 @@ if (launchAddresses.length < 20) {
 }
 
 // Verification 2: Overlap check
-const usersSet = new Set(usersAddresses);
-const overlap = launchAddresses.filter((addr) => usersSet.has(addr));
+const preprodSet = new Set(preprodAddresses);
+const previewSet = new Set(previewAddresses);
 
-if (overlap.length > 0) {
-  console.error(`❌ ERROR: Found ${overlap.length} overlapping addresses between cohorts! Zero overlap is strictly required.`);
-  overlap.forEach((addr) => console.error(`   - Overlapping: ${addr}`));
+const preprodLaunchOverlap = launchAddresses.filter((addr) => preprodSet.has(addr));
+const preprodPreviewOverlap = previewAddresses.filter((addr) => preprodSet.has(addr));
+const launchPreviewOverlap = launchAddresses.filter((addr) => previewSet.has(addr));
+
+if (preprodLaunchOverlap.length > 0 || preprodPreviewOverlap.length > 0 || launchPreviewOverlap.length > 0) {
+  console.error('❌ ERROR: Found overlapping addresses across cohorts! Zero overlap is strictly required.');
   hasErrors = true;
 } else {
-  console.log('✅ Strict Cohort Isolation: Exactly 0 overlapping addresses between USERS.md and LAUNCH_USERS.md.');
+  console.log('✅ Strict Multi-Network & Cohort Isolation: Exactly 0 overlapping addresses across USERS.md, PREVIEW_USERS.md, and LAUNCH_USERS.md.');
 }
 
 console.log('\n----------------------------------------------------------------');
+const totalUsers = preprodAddresses.length + previewAddresses.length + launchAddresses.length;
 if (hasErrors) {
   console.error('❌ User onboarding validation FAILED.');
   process.exit(1);
 } else {
-  console.log(`🎉 ALL USER COHORT VALIDATIONS PASSED! (${usersAddresses.length + launchAddresses.length} Total Unique Users, 0 Overlap)`);
+  console.log(`🎉 ALL USER COHORT VALIDATIONS PASSED! (${totalUsers} Total Unique Users, 0 Overlap)`);
+  console.log(`   - Preprod Testnet: ${preprodAddresses.length + launchAddresses.length} users`);
+  console.log(`   - Preview Testnet: ${previewAddresses.length} users`);
   console.log('----------------------------------------------------------------\n');
 }
