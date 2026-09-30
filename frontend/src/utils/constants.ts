@@ -74,6 +74,55 @@ export const DISTRIBUTION_RULES: DistributionRule[] = [
   }
 ];
 
+export interface PolicyTemplate {
+  id: string;
+  name: string;
+  category: 'Payroll' | 'Grants' | 'DAO Splits' | 'Revenue';
+  ruleType: 'percentage' | 'equal' | 'capped';
+  description: string;
+  defaultPool: number;
+  defaultParticipants: number;
+}
+
+export const POLICY_TEMPLATES: PolicyTemplate[] = [
+  {
+    id: 'P-014',
+    name: 'Core Engineering Monthly Payroll',
+    category: 'Payroll',
+    ruleType: 'percentage',
+    description: 'Tiered compensation split: 40% Senior Dev, 35% Smart Contract, 25% UI & QA.',
+    defaultPool: 50000,
+    defaultParticipants: 3,
+  },
+  {
+    id: 'P-015',
+    name: 'DAO Contributor Equal Dividend',
+    category: 'DAO Splits',
+    ruleType: 'equal',
+    description: 'Even partition of monthly treasury reward pool across all active verified contributors.',
+    defaultPool: 30000,
+    defaultParticipants: 6,
+  },
+  {
+    id: 'P-016',
+    name: 'Ecosystem Grant Program Ceiling',
+    category: 'Grants',
+    ruleType: 'capped',
+    description: 'Proves individual milestone grant disbursements do not breach tier maximum caps.',
+    defaultPool: 100000,
+    defaultParticipants: 4,
+  },
+  {
+    id: 'P-017',
+    name: 'Quarterly Agency Revenue Share',
+    category: 'Revenue',
+    ruleType: 'percentage',
+    description: 'Private revenue dividend adhering to pre-agreed partner equity commitments.',
+    defaultPool: 75000,
+    defaultParticipants: 5,
+  },
+];
+
 export const APP_CONFIG = {
   appName: 'Partio',
   tagline: 'Allocate fairly. Pay privately. Prove everything.',

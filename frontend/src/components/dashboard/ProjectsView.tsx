@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Shield, Coins, Users, Search, FileCheck2 } from 'lucide-react';
 import type { ProjectData } from '../../hooks/useContractState';
-import { type NetworkId } from '../../utils/constants';
+import { type NetworkId, POLICY_TEMPLATES } from '../../utils/constants';
 import { AllocationCertificateModal } from './AllocationCertificateModal';
 
 interface ProjectsViewProps {
@@ -209,6 +209,40 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
             </p>
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>1-Click Policy Preset (Point 32 Vision):</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {POLICY_TEMPLATES.map((tmpl) => (
+                    <button
+                      key={tmpl.id}
+                      type="button"
+                      onClick={() => {
+                        setNewTitle(tmpl.name);
+                        setNewPool(String(tmpl.defaultPool));
+                        setNewParticipants(String(tmpl.defaultParticipants));
+                        setNewRule(tmpl.ruleType);
+                      }}
+                      className="p-2 text-left rounded-xl bg-slate-900/90 border border-slate-700/70 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all text-xs group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-slate-200 group-hover:text-emerald-300 transition-colors">
+                          {tmpl.id}
+                        </span>
+                        <span className="text-[10px] text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+                          {tmpl.category}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 truncate mt-0.5 font-normal">
+                        {tmpl.name}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Project Title / Payroll Name
