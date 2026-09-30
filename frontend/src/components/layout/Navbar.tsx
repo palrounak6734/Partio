@@ -65,9 +65,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="relative group">
             <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 opacity-40 group-hover:opacity-75 blur-md transition-all duration-300" />
             <img
-              src="/splitshield_logo.jpg"
+              src="/partio_logo.svg"
               alt="Partio Logo"
-              className="relative w-10 h-10 rounded-xl object-cover border border-emerald-400/50 shadow-lg shadow-emerald-500/25"
+              className="relative w-10 h-10 rounded-xl object-contain p-1 border border-emerald-400/40 bg-[#0a0f18]/80 shadow-lg shadow-emerald-500/20"
             />
           </div>
           <div>
