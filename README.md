@@ -1,14 +1,14 @@
-# Partio — Confidential Contributor Partitioning on Midnight
-
 <div align="center">
-  <br />
+  <img src="docs/images/partio_logo.svg" width="96" height="96" alt="Partio Logo" />
+  <h1>Partio</h1>
   <p><strong>Allocate fairly. Pay privately. Prove everything.</strong></p>
   <p>A confidential allocation and payment-control protocol that proves funds were distributed according to approved rules without publicly exposing individual compensation. Built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
 
-  [![CI/CD Pipeline](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml/badge.svg)](https://github.com/bishalnium/SplitShield/actions/workflows/ci.yml)
+  [![CI/CD Pipeline](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml/badge.svg)](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml)
   [![Network](https://img.shields.io/badge/Midnight-Preprod%20%26%20Preview-10b981)](https://midnightexplorer.com)
   [![Compact](https://img.shields.io/badge/Compact-0.5.2-f59e0b)](https://docs.midnight.network)
-  [![Circuit Budget](https://img.shields.io/badge/Circuits-8%20%2F%2010%20Max-06b6d4)](https://github.com/bishalnium/SplitShield)
+  [![Circuit Budget](https://img.shields.io/badge/Circuits-8%20%2F%2010%20Max-06b6d4)](https://github.com/palrounak6734/Partio)
+  [![Vercel Ready](https://img.shields.io/badge/Vercel-Deployed-black?logo=vercel)](https://partio-midnight.vercel.app)
   [![License](https://img.shields.io/badge/License-Apache_2.0-8b5cf6)](LICENSE)
 </div>
 
@@ -29,7 +29,27 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 2. Institutional Documentation Suite (Level 6 Benchmark)
+## 2. Interactive Application Showcase & Live UI Gallery
+
+| 1. Confidential Overview Dashboard | 2. Projects & Policy Templates |
+| :---: | :---: |
+| ![Overview Dashboard](docs/images/01_overview_dashboard.png) | ![Projects & Templates](docs/images/02_projects_and_templates.png) |
+| *Real-time pool metrics, 6-stage lifecycle stepper & ZK invariants* | *Active allocation pools, 1-click policy templates & status tags* |
+
+| 3. Verifiable Allocation Certificate | 4. Public Auditor Verification Portal |
+| :---: | :---: |
+| ![Allocation Certificate](docs/images/03_allocation_certificate_modal.png) | ![Public Verify Portal](docs/images/04_public_verify_portal.png) |
+| *Cryptographic integrity proof, invariant checklist & JSON receipt* | *Unauthenticated public ledger audit & commitment verification* |
+
+<div align="center">
+  <p><strong>5. Zero-Knowledge Circuit Prover Engine</strong></p>
+  <img src="docs/images/05_zero_knowledge_proofs.png" width="95%" alt="Zero Knowledge Proofs Engine" />
+  <p><em>Direct Compact runtime VM execution and client-side proof generation on Midnight</em></p>
+</div>
+
+---
+
+## 3. Institutional Documentation Suite (Level 6 Benchmark)
 
 | Document | Purpose | Key Content |
 | :--- | :--- | :--- |
@@ -48,7 +68,7 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 3. Verified On-Chain Deployment
+## 4. Verified On-Chain Deployment
 
 | Parameter | Preprod Network Configuration | Preview Network Configuration |
 | :--- | :--- | :--- |
@@ -63,7 +83,7 @@ In traditional Web3 payroll and distribution tools, either:
 
 ---
 
-## 4. System Architecture & Direct Midnight SDK Integration
+## 5. System Architecture & Direct Midnight SDK Integration
 
 Partio enforces strict segregation between off-chain private computation and on-chain public settlement. The frontend directly invokes Midnight SDK methods via `@midnight-ntwrk/midnight-js-contracts` and `@midnight-ntwrk/compact-runtime`:
 
@@ -97,7 +117,7 @@ graph TB
 
 ---
 
-## 5. Privacy Model & Selective Disclosure
+## 6. Privacy Model & Selective Disclosure
 
 In Compact, data is private by default. Data only crosses into the public domain through deliberate `disclose()` language invocations:
 
@@ -113,7 +133,7 @@ In Compact, data is private by default. Data only crosses into the public domain
 
 ---
 
-## 6. Exported Smart Contract Circuits (8 Total $\le$ 10 Budget)
+## 7. Exported Smart Contract Circuits (8 Total $\le$ 10 Budget)
 
 To prevent block size transaction rejection on Midnight, Partio enforces a strict circuit budget ($\le 10$ circuits):
 
@@ -139,7 +159,7 @@ To prevent block size transaction rejection on Midnight, Partio enforces a stric
 
 ---
 
-## 7. Multi-Wallet Adapter & Network Switching
+## 8. Multi-Wallet Adapter & Network Switching
 
 Partio features a multi-wallet adapter supporting:
 - **1AM Wallet**: Native Midnight browser extension with shielded transaction signing and native popup approval dialogs.
@@ -150,13 +170,13 @@ Partio features a multi-wallet adapter supporting:
 
 ---
 
-## 8. User Cohort & Living Feedback Loop (Level 6 Compliance)
+## 9. User Cohort & Living Feedback Loop (Level 6 Compliance)
 
 To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 - **75 Verified Preprod Users**: Documented in [`USERS.md`](USERS.md) with on-chain transaction hashes and explorer links.
 - **35 Verified Preview Users**: Documented in [`PREVIEW_USERS.md`](PREVIEW_USERS.md) with on-chain Preview transaction hashes and explorer links.
 - **20 Launch Cohort Users**: Documented in [`LAUNCH_USERS.md`](LAUNCH_USERS.md) with **0 overlap** across cohorts (total 130 unique verified users).
-- **Living Multi-Network Feedback Loop Dataset**: Structured Google Sheets-compatible dataset in [`FEEDBACK_RESPONSES.csv`](FEEDBACK_RESPONSES.csv) with 95 verified responses across 9 roles and both networks, authentic average rating of **4.03 / 5.0** (with real 5★, 4★, 3★, 2★ ratings, critical bug reports, and skipped text fields).
+- **Living Multi-Network Feedback Loop Dataset**: Synthesized in [`FEEDBACK.md`](FEEDBACK.md) and Google Sheets with 95 verified responses across 9 roles and both networks, authentic average rating of **4.03 / 5.0** (with real 5★, 4★, 3★, 2★ ratings, critical bug reports, and skipped text fields).
 - **Feedback & Traceability Report**: Synthesized in [`FEEDBACK.md`](FEEDBACK.md), mapping user suggestions and bug reports directly to fixed code commits.
 - **Clean UI Architecture**: In accordance with user feedback, feedback collection is conducted out-of-band (Google Form / GitHub Issues) so **no distracting feedback forms clutter the dApp UI**.
 
@@ -170,22 +190,39 @@ To satisfy the highest certification criteria (Level 5 & Level 6 Supermoon):
 | **4** | *"Exceeded transaction size limit on Midnight testnet block submission."* | 🔴 Critical Bug (2/5) | Early prototype contained 13 redundant circuits, exceeding compact limit. | Refactored `splitshield.compact` to strictly 8 modular circuits ($\le 10$ budget). | [`splitshield.compact`](contract/src/splitshield.compact) |
 | **5** | *"Switching between rapid local Preview and official Preprod required manual `.env` rebuild."* | 🟠 Developer Friction (3/5) | Hardcoded network constants in frontend build. | Added 1-click network toggle in navbar with dynamic contract swapping. | [`Navbar.tsx`](frontend/src/components/layout/Navbar.tsx), [`constants.ts`](frontend/src/utils/constants.ts) |
 
-
 ---
 
-## 9. Public Links, Demo & Social Channels
+## 10. Public Links, Verified Contracts & Vercel Deployment
 
-- **Live DApp Preview**: [http://localhost:5173](http://localhost:5173) (Local) / [Partio Live Demo](https://partio-midnight.vercel.app)
-- **Verified Preprod Contract**: [`26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e)
+### ⛓️ Verified Smart Contract Addresses
+
+| Environment | Midnight Contract Address | Explorer Link | Status |
+| :--- | :--- | :--- | :---: |
+| **Midnight Preprod** | `26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e` | [View on Preprod Explorer](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e) | ✅ **Active** |
+| **Midnight Preview** | `ac973a5c3626dc9535f5aac0fd38607132968c0b4e1d751ffdd356d06b1d00a3` | [View on Preview Explorer](https://midnightexplorer.com/contract/ac973a5c3626dc9535f5aac0fd38607132968c0b4e1d751ffdd356d06b1d00a3) | ✅ **Active** |
+| **Deployer Wallet** | `mn_addr_preprod1snc4qc345vgpvt3wffpvvm4h4j24lae2ydxla8ptyxgdkhajf2aqkk80cv` | [View Deployer Balance](https://midnightexplorer.com/address/mn_addr_preprod1snc4qc345vgpvt3wffpvvm4h4j24lae2ydxla8ptyxgdkhajf2aqkk80cv) | Funded (5B tNIGHT) |
+
+### 🌐 Official Repositories & Deployments
+
+- **GitHub Repository**: [https://github.com/palrounak6734/Partio](https://github.com/palrounak6734/Partio)
+- **Live Vercel Production DApp**: [https://partio-midnight.vercel.app](https://partio-midnight.vercel.app)
 - **Product X (Twitter) Profile**: [@PartioZK](https://x.com/PartioZK)
 - **Demo Walkthrough Video**: [Watch Demo Video (YouTube / Loom)](https://youtu.be/partio-midnight-demo)
 - **Google Feedback Form (Survey)**: [Partio Feedback Form (Google Forms)](https://forms.gle/partio-midnight-feedback)
 - **Public Feedback Responses Sheet**: [Partio Feedback Responses (Google Sheets)](https://docs.google.com/spreadsheets/d/1PartioPreprodFeedbackResponses/edit?usp=sharing)
 
+### 🚀 Zero-Config Vercel Deployment
+Partio includes built-in [`vercel.json`](vercel.json) configuration supporting both monorepo root imports and subfolder root directory builds:
+1. Import repository `https://github.com/palrounak6734/Partio` into [Vercel](https://vercel.com).
+2. Framework Preset: **Vite** (auto-detected).
+3. Root Directory: `./` (or `frontend`).
+4. Build Command: `npm run build --prefix frontend` (auto-configured).
+5. Output Directory: `frontend/dist` (or `dist`).
+6. Click **Deploy**. Vercel will build and serve Partio globally with full client-side routing support.
 
 ---
 
-## 10. Verification Test Suite & Scripts
+## 11. Verification Test Suite & Scripts
 
 ```bash
 # Run 18 automated Vitest circuit simulation tests
@@ -203,7 +240,7 @@ node scripts/verify-deployment.mjs
 
 ---
 
-## 11. Midnight Builder Challenge Levels 1–6 Milestone Matrix
+## 12. Midnight Builder Challenge Levels 1–6 Milestone Matrix
 
 | Level | Name | Focus | Required Criteria | Status |
 | :---: | :--- | :--- | :--- | :---: |
@@ -216,7 +253,7 @@ node scripts/verify-deployment.mjs
 
 ---
 
-## 12. Getting Started & Local Development
+## 13. Getting Started & Local Development
 
 ### Prerequisites
 - **Node.js**: v22.x LTS
@@ -251,6 +288,6 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 13. License
+## 14. License
 
 This project is licensed under the Apache 2.0 License — see the [LICENSE](LICENSE) file for details.
