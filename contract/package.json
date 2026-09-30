@@ -26,8 +26,8 @@
     "@polkadot/api": "^15.0.0",
     "@polkadot/util": "^13.0.0",
     "@scure/bip39": "^2.4.0",
+    "partio": "file:..",
     "rxjs": "^7.8.2",
-    "splitshield": "file:..",
     "ws": "^8.21.3"
   },
   "devDependencies": {
