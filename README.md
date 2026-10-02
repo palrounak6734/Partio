@@ -5,6 +5,13 @@
   <p>A confidential allocation and payment-control protocol that proves funds were distributed according to approved rules without publicly exposing individual compensation. Built on Midnight's dual-state architecture with direct Midnight.js SDK contract execution.</p>
   <p><em>Partio — Confidential Contributor Partitioning on Midnight Network. Built and maintained by <a href="https://github.com/palrounak6734">@palrounak6734</a>.</em></p>
 
+  <p>
+    <a href="https://partio-midnight.netlify.app"><strong>🌐 Launch Live Production DApp</strong></a> &nbsp;&bull;&nbsp;
+    <a href="https://www.youtube.com/watch?v=w4O5nR2VKhI"><strong>🎬 Watch Video Demo</strong></a> &nbsp;&bull;&nbsp;
+    <a href="https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e"><strong>⛓️ Preprod Contract</strong></a> &nbsp;&bull;&nbsp;
+    <a href="https://x.com/partio_00"><strong>🐦 Follow @partio_00</strong></a>
+  </p>
+
   [![CI/CD Pipeline](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml/badge.svg)](https://github.com/palrounak6734/Partio/actions/workflows/ci.yml)
   [![Network](https://img.shields.io/badge/Midnight-Preprod%20%26%20Preview-10b981)](https://midnightexplorer.com)
   [![Compact](https://img.shields.io/badge/Compact-0.5.2-f59e0b)](https://docs.midnight.network)
@@ -12,6 +19,12 @@
   [![Netlify](https://img.shields.io/badge/Netlify-Deployed-00C7B7?logo=netlify&logoColor=white)](https://partio-midnight.netlify.app)
   [![License](https://img.shields.io/badge/License-Apache_2.0-8b5cf6)](LICENSE)
 </div>
+
+> [!IMPORTANT]
+> 🚀 **Live Production Application:** **[https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)**  
+> 🎬 **Demo Video Walkthrough:** **[Watch on YouTube (4 min)](https://www.youtube.com/watch?v=w4O5nR2VKhI)**  
+> ⛓️ **Verified Midnight Preprod Smart Contract:** [`26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e)  
+> 🐦 **Official Product X (Twitter):** [@partio_00](https://x.com/partio_00)
 
 ---
 
@@ -73,6 +86,7 @@ In traditional Web3 payroll and distribution tools, either:
 
 | Parameter | Preprod Network Configuration | Preview Network Configuration |
 | :--- | :--- | :--- |
+| **Live Production DApp** | [**https://partio-midnight.netlify.app**](https://partio-midnight.netlify.app) | [**https://partio-midnight.netlify.app**](https://partio-midnight.netlify.app) |
 | **Network Name** | Midnight Preprod Testnet | Midnight Preview Testnet |
 | **Contract Address** | [`26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e) | Supported via Dynamic Switcher |
 | **Deployment TX** | `008227375f0a9158461f689bb8b0b7343e5b294ba27c885bc3120d42d7cf67f3c6` | — |

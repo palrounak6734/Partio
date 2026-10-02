@@ -3,6 +3,8 @@
 
 > **Tagline:** Allocate fairly. Pay privately. Prove everything.  
 > **Platform Version:** Partio v0.1.0 (Midnight Preprod & Preview)  
+> **Live Production DApp:** [https://partio-midnight.netlify.app](https://partio-midnight.netlify.app)  
+> **Demo Walkthrough Video:** [https://www.youtube.com/watch?v=w4O5nR2VKhI](https://www.youtube.com/watch?v=w4O5nR2VKhI)  
 > **Track:** Finance / Payments & Confidential Financial Operations  
 > **Target Network:** Midnight Blockchain (Substrate + Impact VM)  
 > **Contract Address (Preprod):** [`26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e`](https://midnightexplorer.com/contract/26a116ed6874d991e32285d364a5979fd05bbf4e815c4c4f2f395883004ae36e)  
